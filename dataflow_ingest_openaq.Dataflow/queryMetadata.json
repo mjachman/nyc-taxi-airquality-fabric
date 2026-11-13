@@ -14,7 +14,8 @@
     },
     "bronze_openaq_measurements": {
       "queryId": "07c9c19d-f074-4553-b055-d99f2b2e829f",
-      "queryName": "bronze_openaq_measurements"
+      "queryName": "bronze_openaq_measurements",
+      "loadEnabled": false
     },
     "EndDate": {
       "queryId": "d0309d01-dbf3-4a38-aeac-612f16bd03e9",
@@ -35,6 +36,12 @@
     "GetSensorDays": {
       "queryId": "48f4b02f-b501-481a-a1ee-9ff30f32b832",
       "queryName": "GetSensorDays",
+      "loadEnabled": false
+    },
+    "bronze_openaq_measurements_DataDestination": {
+      "queryId": "270d072e-ffe1-43fe-ae84-f8c1a5e49d9a",
+      "queryName": "bronze_openaq_measurements_DataDestination",
+      "isHidden": true,
       "loadEnabled": false
     }
   },

@@ -20,6 +20,7 @@ shared bronze_openaq_locations = let
   #"Changed column type 1" = Table.TransformColumnTypes(#"Renamed columns", {{"isMonitor", type logical}, {"units", type text}})
 in
   #"Changed column type 1";
+[DataDestinations = {[Definition = [Kind = "Reference", QueryName = "bronze_openaq_measurements_DataDestination", IsNewTarget = true], Settings = [Kind = "Manual", AllowCreation = true, ColumnSettings = [Mappings = {[SourceColumnName = "sensor_id", DestinationColumnName = "sensor_id"], [SourceColumnName = "value", DestinationColumnName = "value"], [SourceColumnName = "hasFlags", DestinationColumnName = "hasFlags"], [SourceColumnName = "utc", DestinationColumnName = "utc"], [SourceColumnName = "local", DestinationColumnName = "local"], [SourceColumnName = "summary.min", DestinationColumnName = "summary.min"], [SourceColumnName = "summary.q02", DestinationColumnName = "summary.q02"], [SourceColumnName = "summary.q25", DestinationColumnName = "summary.q25"], [SourceColumnName = "summary.median", DestinationColumnName = "summary.median"], [SourceColumnName = "summary.q75", DestinationColumnName = "summary.q75"], [SourceColumnName = "summary.q98", DestinationColumnName = "summary.q98"], [SourceColumnName = "summary.max", DestinationColumnName = "summary.max"], [SourceColumnName = "summary.avg", DestinationColumnName = "summary.avg"], [SourceColumnName = "summary.sd", DestinationColumnName = "summary.sd"], [SourceColumnName = "expectedCount", DestinationColumnName = "expectedCount"], [SourceColumnName = "expectedInterval", DestinationColumnName = "expectedInterval"], [SourceColumnName = "observedCount", DestinationColumnName = "observedCount"], [SourceColumnName = "observedInterval", DestinationColumnName = "observedInterval"], [SourceColumnName = "percentComplete", DestinationColumnName = "percentComplete"], [SourceColumnName = "percentCoverage", DestinationColumnName = "percentCoverage"]}], DynamicSchema = true, UpdateMethod = [Kind = "Replace"], TypeSettings = [Kind = "Table"]]]}]
 shared bronze_openaq_measurements = let
   Source = bronze_openaq_locations,
   #"Filtered rows" = Table.SelectRows(Source, each Date.From([datetime_first_utc]) <= EndDate and Date.From([datetime_last_utc]) >= StartDate),
@@ -30,9 +31,11 @@ shared bronze_openaq_measurements = let
   #"Expanded period" = Table.ExpandRecordColumn(#"Expanded Invoked custom function 1", "period", {"datetimeFrom"}, {"datetimeFrom"}),
   #"Expanded datetimeFrom" = Table.ExpandRecordColumn(#"Expanded period", "datetimeFrom", {"utc", "local"}, {"utc", "local"}),
   #"Expanded summary" = Table.ExpandRecordColumn(#"Expanded datetimeFrom", "summary", {"min", "q02", "q25", "median", "q75", "q98", "max", "avg", "sd"}, {"summary.min", "summary.q02", "summary.q25", "summary.median", "summary.q75", "summary.q98", "summary.max", "summary.avg", "summary.sd"}),
-  #"Expanded coverage" = Table.ExpandRecordColumn(#"Expanded summary", "coverage", {"expectedCount", "expectedInterval", "observedCount", "observedInterval", "percentComplete", "percentCoverage"}, {"expectedCount", "expectedInterval", "observedCount", "observedInterval", "percentComplete", "percentCoverage"})
+  #"Expanded coverage" = Table.ExpandRecordColumn(#"Expanded summary", "coverage", {"expectedCount", "expectedInterval", "observedCount", "observedInterval", "percentComplete", "percentCoverage"}, {"expectedCount", "expectedInterval", "observedCount", "observedInterval", "percentComplete", "percentCoverage"}),
+  #"Expanded flagInfo" = Table.ExpandRecordColumn(#"Expanded coverage", "flagInfo", {"hasFlags"}, {"hasFlags"}),
+  #"Changed column type" = Table.TransformColumnTypes(#"Expanded flagInfo", {{"value", type number}, {"summary.min", type number}, {"summary.q02", type number}, {"summary.q25", type number}, {"summary.median", type number}, {"summary.q75", type number}, {"summary.q98", type number}, {"summary.max", type number}, {"summary.avg", type number}, {"summary.sd", type number}, {"percentComplete", type number}, {"percentCoverage", type number}, {"hasFlags", type logical}, {"utc", type datetime}, {"local", type text}, {"expectedInterval", type text}, {"observedInterval", type text}, {"expectedCount", Int64.Type}, {"observedCount", Int64.Type}})
 in
-  #"Expanded coverage";
+  #"Changed column type";
 shared EndDate = #date(2026, 1, 31) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
 shared StartDate = #date(2024, 1, 1) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
 shared bronze_openaq_locations_DataDestination = let
@@ -52,3 +55,11 @@ let
   Response = Function.InvokeAfter(CallApi, #duration(0, 0, 0, 1.1))
 in
  Response;
+shared bronze_openaq_measurements_DataDestination = let
+  Pattern = Lakehouse.Contents([HierarchicalNavigation = true, EnableVorder = true, OutputMetadataRefresh = true, CreateNavigationProperties = false, EnableFolding = false]),
+  Navigation_1 = Pattern{[workspaceId = "f74538c4-e1c0-4843-8fd1-9e35f938bafa"]}[Data],
+  Navigation_2 = Navigation_1{[lakehouseId = "d6dfd742-9000-4d7b-9a4c-adb901a08cea"]}[Data],
+  Navigation_3 = Navigation_2{[Id = "dbo", ItemKind = "Schema"]}[Data],
+  TableNavigation = Navigation_3{[Id = "bronze_openaq_measurements", ItemKind = "Table"]}?[Data]?
+in
+  TableNavigation;

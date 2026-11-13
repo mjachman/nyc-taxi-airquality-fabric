@@ -1,6 +1,6 @@
 [StagingDefinition = [Kind = "FastCopy"]]
 section Section1;
-[DataDestinations = {[Definition = [Kind = "Reference", QueryName = "bronze_openaq_locations_DataDestination", IsNewTarget = true], Settings = [Kind = "Manual", AllowCreation = true, ColumnSettings = [Mappings = {[SourceColumnName = "id", DestinationColumnName = "id"], [SourceColumnName = "name", DestinationColumnName = "name"], [SourceColumnName = "locality", DestinationColumnName = "locality"], [SourceColumnName = "timezone", DestinationColumnName = "timezone"], [SourceColumnName = "latitude", DestinationColumnName = "latitude"], [SourceColumnName = "longitude", DestinationColumnName = "longitude"], [SourceColumnName = "utc.1", DestinationColumnName = "utc.1"], [SourceColumnName = "utc", DestinationColumnName = "utc"]}], DynamicSchema = true, UpdateMethod = [Kind = "Replace"], TypeSettings = [Kind = "Table"]]]}]
+[DataDestinations = {[Definition = [Kind = "Reference", QueryName = "bronze_openaq_locations_DataDestination", IsNewTarget = true], Settings = [Kind = "Manual", AllowCreation = true, ColumnSettings = [Mappings = {[SourceColumnName = "id", DestinationColumnName = "id"], [SourceColumnName = "name", DestinationColumnName = "name"], [SourceColumnName = "locality", DestinationColumnName = "locality"], [SourceColumnName = "timezone", DestinationColumnName = "timezone"], [SourceColumnName = "isMonitor", DestinationColumnName = "isMonitor"], [SourceColumnName = "sensor_id", DestinationColumnName = "sensor_id"], [SourceColumnName = "parameter", DestinationColumnName = "parameter"], [SourceColumnName = "units", DestinationColumnName = "units"], [SourceColumnName = "latitude", DestinationColumnName = "latitude"], [SourceColumnName = "longitude", DestinationColumnName = "longitude"], [SourceColumnName = "datetime_first_utc", DestinationColumnName = "datetime_first_utc"], [SourceColumnName = "datetime_last_utc", DestinationColumnName = "datetime_last_utc"]}], DynamicSchema = true, UpdateMethod = [Kind = "Replace"], TypeSettings = [Kind = "Table"]]]}]
 shared bronze_openaq_locations = let
   BaseUrl = "https://api.openaq.org/v3",
   ApiKey = "417bd0ba85b9cab89956c9373a84530948679656790523aa192c534a7961c9cc",
@@ -16,9 +16,25 @@ shared bronze_openaq_locations = let
   #"Expanded coordinates 1" = Table.ExpandRecordColumn(#"Expanded datetimeLast 1", "coordinates", {"latitude", "longitude"}, {"latitude", "longitude"}),
   #"Choose columns" = Table.SelectColumns(#"Expanded coordinates 1", {"id", "name", "locality", "timezone", "isMonitor", "id.1", "name.2", "units", "latitude", "longitude", "utc", "utc.1"}),
   #"Changed column type" = Table.TransformColumnTypes(#"Choose columns", {{"id", Int64.Type}, {"id.1", Int64.Type}, {"name.2", type text}, {"name", type text}, {"locality", type text}, {"timezone", type text}, {"latitude", type number}, {"longitude", type number}, {"utc.1", type datetime}, {"utc", type datetime}}),
-  #"Renamed columns" = Table.RenameColumns(#"Changed column type", {{"id.1", "sensor_id"}, {"name.2", "parameter"}, {"utc", "datetime_first_utc"}, {"utc.1", "datetime_last_utc"}})
+  #"Renamed columns" = Table.RenameColumns(#"Changed column type", {{"id.1", "sensor_id"}, {"name.2", "parameter"}, {"utc", "datetime_first_utc"}, {"utc.1", "datetime_last_utc"}}),
+  #"Changed column type 1" = Table.TransformColumnTypes(#"Renamed columns", {{"isMonitor", type logical}, {"units", type text}})
 in
-  #"Renamed columns";
+  #"Changed column type 1";
+shared bronze_openaq_measurements = let
+  Source = bronze_openaq_locations,
+  #"Filtered rows" = Table.SelectRows(Source, each Date.From([datetime_first_utc]) <= EndDate and Date.From([datetime_last_utc]) >= StartDate),
+  #"Choose columns" = Table.SelectColumns(#"Filtered rows", {"sensor_id"}),
+  #"Invoked custom function" = Table.AddColumn(#"Choose columns", "Invoked custom function", each GetSensorDays([sensor_id])),
+  #"Expanded Invoked custom function" = Table.ExpandListColumn(#"Invoked custom function", "Invoked custom function"),
+  #"Expanded Invoked custom function 1" = Table.ExpandRecordColumn(#"Expanded Invoked custom function", "Invoked custom function", {"value", "flagInfo", "period", "summary", "coverage"}, {"value", "flagInfo", "period", "summary", "coverage"}),
+  #"Expanded period" = Table.ExpandRecordColumn(#"Expanded Invoked custom function 1", "period", {"datetimeFrom"}, {"datetimeFrom"}),
+  #"Expanded datetimeFrom" = Table.ExpandRecordColumn(#"Expanded period", "datetimeFrom", {"utc", "local"}, {"utc", "local"}),
+  #"Expanded summary" = Table.ExpandRecordColumn(#"Expanded datetimeFrom", "summary", {"min", "q02", "q25", "median", "q75", "q98", "max", "avg", "sd"}, {"summary.min", "summary.q02", "summary.q25", "summary.median", "summary.q75", "summary.q98", "summary.max", "summary.avg", "summary.sd"}),
+  #"Expanded coverage" = Table.ExpandRecordColumn(#"Expanded summary", "coverage", {"expectedCount", "expectedInterval", "observedCount", "observedInterval", "percentComplete", "percentCoverage"}, {"expectedCount", "expectedInterval", "observedCount", "observedInterval", "percentComplete", "percentCoverage"})
+in
+  #"Expanded coverage";
+shared EndDate = #date(2026, 1, 31) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
+shared StartDate = #date(2024, 1, 1) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
 shared bronze_openaq_locations_DataDestination = let
   Pattern = Lakehouse.Contents([HierarchicalNavigation = true, EnableVorder = true, OutputMetadataRefresh = true, CreateNavigationProperties = false, EnableFolding = false]),
   Navigation_1 = Pattern{[workspaceId = "f74538c4-e1c0-4843-8fd1-9e35f938bafa"]}[Data],
@@ -27,9 +43,12 @@ shared bronze_openaq_locations_DataDestination = let
   TableNavigation = Navigation_3{[Id = "bronze_openaq_locations", ItemKind = "Table"]}?[Data]?
 in
   TableNavigation;
-shared bronze_openaq_measurements = let
-  Source = bronze_openaq_locations
+shared GetSensorDays = (sensorId as number) as list =>
+let
+  BaseUrl = "https://api.openaq.org/v3",
+  ApiKey = "417bd0ba85b9cab89956c9373a84530948679656790523aa192c534a7961c9cc",
+  Options = [RelativePath = "sensors/" & Text.From(sensorId) & "/days", Query= [date_from = Date.ToText(StartDate, "yyyy-MM-dd"), date_to = Date.ToText(EndDate, "yyyy-MM-dd"), limit = "1000"], Headers = [#"X-API-Key" = ApiKey]],
+  CallApi = () => try Json.Document(Web.Contents(BaseUrl, Options))[results] otherwise {},
+  Response = Function.InvokeAfter(CallApi, #duration(0, 0, 0, 1.1))
 in
-  Source;
-shared EndDate = #date(2026, 1, 31) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
-shared StartDate = #date(2024, 1, 1) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
+ Response;

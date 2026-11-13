@@ -12,12 +12,6 @@
       "queryName": "bronze_openaq_locations",
       "loadEnabled": false
     },
-    "bronze_openaq_locations_DataDestination": {
-      "queryId": "6fea3a4a-70af-415e-9243-f481c0ed61ab",
-      "queryName": "bronze_openaq_locations_DataDestination",
-      "isHidden": true,
-      "loadEnabled": false
-    },
     "bronze_openaq_measurements": {
       "queryId": "07c9c19d-f074-4553-b055-d99f2b2e829f",
       "queryName": "bronze_openaq_measurements"
@@ -30,6 +24,17 @@
     "StartDate": {
       "queryId": "86afa6ce-f560-4bca-ba07-86294477f834",
       "queryName": "StartDate",
+      "loadEnabled": false
+    },
+    "bronze_openaq_locations_DataDestination": {
+      "queryId": "b2dd9dfc-d5b6-4432-9117-a608d1df46a7",
+      "queryName": "bronze_openaq_locations_DataDestination",
+      "isHidden": true,
+      "loadEnabled": false
+    },
+    "GetSensorDays": {
+      "queryId": "48f4b02f-b501-481a-a1ee-9ff30f32b832",
+      "queryName": "GetSensorDays",
       "loadEnabled": false
     }
   },
@@ -44,6 +49,5 @@
       "kind": "Lakehouse",
       "connectionId": "{\"ClusterId\":\"5f26d8b4-b74a-468f-b27d-672c2d214e9d\",\"DatasourceId\":\"bc6b3533-6631-46d8-a440-ff243b676cdd\"}"
     }
-  ],
-  "parametric": true
+  ]
 }

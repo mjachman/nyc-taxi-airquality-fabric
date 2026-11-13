@@ -1,0 +1,103 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "ForEach",
+        "typeProperties": {
+          "items": {
+            "value": "@pipeline().parameters.periods_to_ingest",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "type": "Copy",
+              "typeProperties": {
+                "source": {
+                  "type": "BinarySource",
+                  "formatSettings": {
+                    "type": "BinaryReadSettings"
+                  },
+                  "storeSettings": {
+                    "type": "HttpReadSettings",
+                    "requestMethod": "GET"
+                  },
+                  "datasetSettings": {
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "HttpServerLocation",
+                        "relativeUrl": "@concat('trip-data/', pipeline().parameters.taxi_type, '_tripdata_', item(), '.parquet')"
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "eaf01432-6914-4f9e-bbc9-6c2e3cf0be87"
+                    },
+                    "annotations": []
+                  }
+                },
+                "sink": {
+                  "type": "BinarySink",
+                  "storeSettings": {
+                    "type": "LakehouseWriteSettings"
+                  },
+                  "datasetSettings": {
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "LakehouseLocation",
+                        "folderPath": "taxi",
+                        "fileName": {
+                          "value": "@concat(pipeline().parameters.taxi_type, '_', item(), '.parquet')",
+                          "type": "Expression"
+                        }
+                      }
+                    },
+                    "linkedService": {
+                      "name": "lakehouse_bronze",
+                      "properties": {
+                        "type": "Lakehouse",
+                        "typeProperties": {
+                          "artifactId": "01a08cea-adb9-9a4c-4d7b-9000d6dfd742",
+                          "workspaceId": "00000000-0000-0000-0000-000000000000",
+                          "rootFolder": "Files"
+                        },
+                        "annotations": []
+                      }
+                    },
+                    "annotations": []
+                  }
+                },
+                "enableStaging": false
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "NYC_taxi_injestor",
+              "dependsOn": []
+            }
+          ]
+        },
+        "name": "ForEachTaxi",
+        "dependsOn": []
+      }
+    ],
+    "parameters": {
+      "periods_to_ingest": {
+        "type": "array",
+        "defaultValue": [
+          "2024-01",
+          "2025-01",
+          "2026-01"
+        ]
+      },
+      "taxi_type": {
+        "type": "string",
+        "defaultValue": "yellow"
+      }
+    }
+  }
+}

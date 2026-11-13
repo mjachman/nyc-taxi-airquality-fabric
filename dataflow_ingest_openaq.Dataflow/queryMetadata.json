@@ -17,6 +17,20 @@
       "queryName": "bronze_openaq_locations_DataDestination",
       "isHidden": true,
       "loadEnabled": false
+    },
+    "bronze_openaq_measurements": {
+      "queryId": "07c9c19d-f074-4553-b055-d99f2b2e829f",
+      "queryName": "bronze_openaq_measurements"
+    },
+    "EndDate": {
+      "queryId": "d0309d01-dbf3-4a38-aeac-612f16bd03e9",
+      "queryName": "EndDate",
+      "loadEnabled": false
+    },
+    "StartDate": {
+      "queryId": "86afa6ce-f560-4bca-ba07-86294477f834",
+      "queryName": "StartDate",
+      "loadEnabled": false
     }
   },
   "connections": [

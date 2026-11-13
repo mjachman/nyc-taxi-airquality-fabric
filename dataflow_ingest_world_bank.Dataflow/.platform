@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Dataflow",
+    "displayName": "dataflow_ingest_world_bank"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "8e25f52f-c8ad-b9b2-434b-2c9119834bfe"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "formatVersion": "202502",
+  "computeEngineSettings": {
+    "allowModernEvaluationEngine": true
+  },
+  "name": "dataflow_ingest_world_bank",
+  "queryGroups": [],
+  "documentLocale": "en-US",
+  "queriesMetadata": {
+    "Query1": {
+      "queryId": "cf4bcbc8-3fdb-4ed6-8019-a7991f8a0508",
+      "queryName": "Query1",
+      "loadEnabled": false
+    },
+    "Query1_DataDestination": {
+      "queryId": "a4d05272-151b-45b5-b9d6-fad4a16fe6db",
+      "queryName": "Query1_DataDestination",
+      "isHidden": true,
+      "loadEnabled": false
+    }
+  },
+  "connections": [
+    {
+      "path": "https://api.worldbank.org/v2",
+      "kind": "Web",
+      "connectionId": "{\"ClusterId\":\"5f26d8b4-b74a-468f-b27d-672c2d214e9d\",\"DatasourceId\":\"de3b0dde-321c-4151-976d-eaa2c80f79fd\"}"
+    },
+    {
+      "path": "Lakehouse",
+      "kind": "Lakehouse",
+      "connectionId": "{\"ClusterId\":\"5f26d8b4-b74a-468f-b27d-672c2d214e9d\",\"DatasourceId\":\"bc6b3533-6631-46d8-a440-ff243b676cdd\"}"
+    }
+  ]
+}

@@ -16,7 +16,7 @@ shared bronze_openaq_locations = let
   #"Expanded coordinates 1" = Table.ExpandRecordColumn(#"Expanded datetimeLast 1", "coordinates", {"latitude", "longitude"}, {"latitude", "longitude"}),
   #"Choose columns" = Table.SelectColumns(#"Expanded coordinates 1", {"id", "name", "locality", "timezone", "isMonitor", "id.1", "name.2", "units", "latitude", "longitude", "utc", "utc.1"}),
   #"Changed column type" = Table.TransformColumnTypes(#"Choose columns", {{"id", Int64.Type}, {"id.1", Int64.Type}, {"name.2", type text}, {"name", type text}, {"locality", type text}, {"timezone", type text}, {"latitude", type number}, {"longitude", type number}, {"utc.1", type datetime}, {"utc", type datetime}}),
-  #"Renamed columns" = Table.RenameColumns(#"Changed column type", {{"id.1", "sensor_id"}, {"name.2", "parameter"}})
+  #"Renamed columns" = Table.RenameColumns(#"Changed column type", {{"id.1", "sensor_id"}, {"name.2", "parameter"}, {"utc", "datetime_first_utc"}, {"utc.1", "datetime_last_utc"}})
 in
   #"Renamed columns";
 shared bronze_openaq_locations_DataDestination = let

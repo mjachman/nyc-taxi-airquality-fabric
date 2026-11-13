@@ -44,5 +44,6 @@
       "kind": "Lakehouse",
       "connectionId": "{\"ClusterId\":\"5f26d8b4-b74a-468f-b27d-672c2d214e9d\",\"DatasourceId\":\"bc6b3533-6631-46d8-a440-ff243b676cdd\"}"
     }
-  ]
+  ],
+  "parametric": true
 }

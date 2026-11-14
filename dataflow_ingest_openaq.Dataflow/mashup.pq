@@ -3,7 +3,7 @@ section Section1;
 [DataDestinations = {[Definition = [Kind = "Reference", QueryName = "bronze_openaq_locations_DataDestination", IsNewTarget = true], Settings = [Kind = "Manual", AllowCreation = true, ColumnSettings = [Mappings = {[SourceColumnName = "id", DestinationColumnName = "id"], [SourceColumnName = "name", DestinationColumnName = "name"], [SourceColumnName = "locality", DestinationColumnName = "locality"], [SourceColumnName = "timezone", DestinationColumnName = "timezone"], [SourceColumnName = "isMonitor", DestinationColumnName = "isMonitor"], [SourceColumnName = "sensor_id", DestinationColumnName = "sensor_id"], [SourceColumnName = "parameter", DestinationColumnName = "parameter"], [SourceColumnName = "units", DestinationColumnName = "units"], [SourceColumnName = "latitude", DestinationColumnName = "latitude"], [SourceColumnName = "longitude", DestinationColumnName = "longitude"], [SourceColumnName = "datetime_first_utc", DestinationColumnName = "datetime_first_utc"], [SourceColumnName = "datetime_last_utc", DestinationColumnName = "datetime_last_utc"]}], DynamicSchema = true, UpdateMethod = [Kind = "Replace"], TypeSettings = [Kind = "Table"]]]}]
 shared bronze_openaq_locations = let
   BaseUrl = "https://api.openaq.org/v3",
-  ApiKey = "417bd0ba85b9cab89956c9373a84530948679656790523aa192c534a7961c9cc",
+  ApiKey = OpenAQApiKey,
   Source = Json.Document(Web.Contents(BaseUrl, [RelativePath = "locations", Query = [bbox = "-74.2557,40.4961,-73.7004,40.9153", limit = "100"], Headers = [#"X-API-Key" = ApiKey]])),
   Navigation = Source[results],
   #"Converted to table 1" = Table.FromList(Navigation, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
@@ -46,15 +46,7 @@ shared bronze_openaq_locations_DataDestination = let
   TableNavigation = Navigation_3{[Id = "bronze_openaq_locations", ItemKind = "Table"]}?[Data]?
 in
   TableNavigation;
-shared GetSensorDays = (sensorId as number) as list =>
-let
-  BaseUrl = "https://api.openaq.org/v3",
-  ApiKey = "417bd0ba85b9cab89956c9373a84530948679656790523aa192c534a7961c9cc",
-  Options = [RelativePath = "sensors/" & Text.From(sensorId) & "/days", Query= [date_from = Date.ToText(StartDate, "yyyy-MM-dd"), date_to = Date.ToText(EndDate, "yyyy-MM-dd"), limit = "1000"], Headers = [#"X-API-Key" = ApiKey]],
-  CallApi = () => try Json.Document(Web.Contents(BaseUrl, Options))[results] otherwise {},
-  Response = Function.InvokeAfter(CallApi, #duration(0, 0, 0, 1.1))
-in
- Response;
+shared OpenAQApiKey = "REPLACE_AT_RUNTIME" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type text];
 shared bronze_openaq_measurements_DataDestination = let
   Pattern = Lakehouse.Contents([HierarchicalNavigation = true, EnableVorder = true, OutputMetadataRefresh = true, CreateNavigationProperties = false, EnableFolding = false]),
   Navigation_1 = Pattern{[workspaceId = "f74538c4-e1c0-4843-8fd1-9e35f938bafa"]}[Data],
@@ -63,3 +55,12 @@ shared bronze_openaq_measurements_DataDestination = let
   TableNavigation = Navigation_3{[Id = "bronze_openaq_measurements", ItemKind = "Table"]}?[Data]?
 in
   TableNavigation;
+shared GetSensorDays = (sensorId as number) as list =>
+let
+  BaseUrl = "https://api.openaq.org/v3",
+  ApiKey = OpenAQApiKey,
+  Options = [RelativePath = "sensors/" & Text.From(sensorId) & "/days", Query= [date_from = Date.ToText(StartDate, "yyyy-MM-dd"), date_to = Date.ToText(EndDate, "yyyy-MM-dd"), limit = "1000"], Headers = [#"X-API-Key" = ApiKey]],
+  CallApi = () => try Json.Document(Web.Contents(BaseUrl, Options))[results] otherwise {},
+  Response = Function.InvokeAfter(CallApi, #duration(0, 0, 0, 1.1))
+in
+ Response;

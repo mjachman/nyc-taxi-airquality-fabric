@@ -7,9 +7,9 @@
   "queryGroups": [],
   "documentLocale": "en-US",
   "queriesMetadata": {
-    "Query1": {
+    "bronze_ecb_fx": {
       "queryId": "086bb26c-3179-45e8-bf34-82b70ed21e12",
-      "queryName": "Query1",
+      "queryName": "bronze_ecb_fx",
       "loadEnabled": false
     },
     "Query1_DataDestination": {

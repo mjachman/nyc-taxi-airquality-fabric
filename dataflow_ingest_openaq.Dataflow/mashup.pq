@@ -4,7 +4,9 @@ section Section1;
 shared bronze_openaq_locations = let
   BaseUrl = "https://api.openaq.org/v3",
   ApiKey = OpenAQApiKey,
-  Source = Json.Document(Web.Contents(BaseUrl, [RelativePath = "locations", Query = [bbox = "-74.2557,40.4961,-73.7004,40.9153", limit = "100"], Headers = [#"X-API-Key" = ApiKey]])),
+  Source = try 
+  Json.Document(Web.Contents(BaseUrl, [RelativePath = "locations", Query = [bbox = "-74.2557,40.4961,-73.7004,40.9153", limit = "100"], Headers = [#"X-API-Key" = ApiKey]]))
+  otherwise [results = {}],
   Navigation = Source[results],
   #"Converted to table 1" = Table.FromList(Navigation, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
   #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to table 1", "Column1", {"id", "name", "locality", "timezone", "country", "owner", "provider", "isMobile", "isMonitor", "instruments", "sensors", "coordinates", "licenses", "bounds", "distance", "datetimeFirst", "datetimeLast"}, {"id", "name", "locality", "timezone", "country", "owner", "provider", "isMobile", "isMonitor", "instruments", "sensors", "coordinates", "licenses", "bounds", "distance", "datetimeFirst", "datetimeLast"}),

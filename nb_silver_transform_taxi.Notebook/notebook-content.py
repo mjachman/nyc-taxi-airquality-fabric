@@ -31,6 +31,7 @@
 
 from pyspark.sql import functions as F 
 from pyspark.sql.types import DecimalType
+from pyspark.sql.types import TimestampType
 
 BRONZE_TAXI_PATH = "abfss://FabricCourseProject@onelake.dfs.fabric.microsoft.com/lakehouse_bronze.Lakehouse/Files/taxi"
 SILVER_TAXI_TABLE = "lakehouse_silver.dbo.silver_taxi_trips"
@@ -98,10 +99,20 @@ def cast_money_columns(df, columns):
 def rename_columns(df, rename_dict):
    return df.withColumnsRenamed(rename_dict)
 
+def convert_ntz_to_timestamp(df):
+    changes = {
+        field.name: F.col(field.name).cast("timestamp")
+        for field in df.schema.fields
+        if field.dataType.simpleString() == "timestamp_ntz"
+    }
+    return df.withColumns(changes) if changes else df
+
 
 
 df_taxi_silver = cast_money_columns(df_raw_taxi, money_columns)
 df_taxi_silver = rename_columns(df_taxi_silver,non_snake_case_columns_replacement_dict)
+df_taxi_silver = convert_ntz_to_timestamp(df_taxi_silver)
+df_taxi_silver = df_taxi_silver.fillna({"cbd_congestion_fee": 0})
 df_taxi_silver.printSchema()
 
 
@@ -212,13 +223,6 @@ df_taxi_clean.printSchema()
 df_taxi_clean.select("fare_amount", "total_amount", "trip_distance", "trip_duration_minutes", "pickup_date", "pu_location_id", "do_location_id").summary("count", "min", "max").show()
 df_taxi_clean.select(F.count("pickup_date"),F.min("pickup_date"),F.max("pickup_date")).show()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
 # CELL ********************
 
 (df_taxi_clean.write
@@ -236,10 +240,3 @@ df_taxi_clean.select(F.count("pickup_date"),F.min("pickup_date"),F.max("pickup_d
 spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
 print(spark.table(SILVER_TAXI_TABLE).count())
 print(spark.table(SILVER_QUARANTINE_TABLE).count())
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }

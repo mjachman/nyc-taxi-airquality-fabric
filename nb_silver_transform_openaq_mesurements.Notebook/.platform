@@ -2,10 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
     "type": "Notebook",
-    "displayName": "nb_silver_transform"
+    "displayName": "nb_silver_transform_openaq_mesurements"
   },
   "config": {
     "version": "2.0",
-    "logicalId": "5378fd0b-11ae-a127-4f54-1d5f37ebf4f9"
+    "logicalId": "6824cd1a-b949-ad50-4c17-06ff068e672b"
   }
 }

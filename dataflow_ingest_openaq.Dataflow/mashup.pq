@@ -48,7 +48,7 @@ shared bronze_openaq_locations_DataDestination = let
   TableNavigation = Navigation_3{[Id = "bronze_openaq_locations", ItemKind = "Table"]}?[Data]?
 in
   TableNavigation;
-shared OpenAQApiKey = "REPLACE_AT_RUNTIME" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type text];
+shared OpenAQApiKey = "cf8e5ccefce6bbcc638ecafdff2cf05dcb246bb920efa3e92107a29f66c2900f" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type text];
 shared bronze_openaq_measurements_DataDestination = let
   Pattern = Lakehouse.Contents([HierarchicalNavigation = true, EnableVorder = true, OutputMetadataRefresh = true, CreateNavigationProperties = false, EnableFolding = false]),
   Navigation_1 = Pattern{[workspaceId = "f74538c4-e1c0-4843-8fd1-9e35f938bafa"]}[Data],

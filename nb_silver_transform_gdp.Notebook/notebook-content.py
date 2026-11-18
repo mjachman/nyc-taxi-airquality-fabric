@@ -32,13 +32,14 @@
 from pyspark.sql import functions as F
 from pyspark.sql.types import DecimalType
 
-BRONZE_ECB_FX_TABLE = "lakehouse_bronze.dbo.bronze_ecb_fx"
-SILVER_ECB_FX_TABLE = "lakehouse_silver.dbo.silver_ecb_fx"
-SILVER_ECB_FX_QUARANTINE = "lakehouse_silver.dbo.silver_ecb_fx_quarantine"
+BRONZE_GDP_TABLE = "lakehouse_bronze.dbo.bronze_world_bank_gdp"
+SILVER_GDP_TABLE = "lakehouse_silver.dbo.silver_world_bank_gdp"
+SILVER_GDP_QUARANTINE = "lakehouse_silver.dbo.silver_world_bank_gdp_quarantine"
 
-df_fx_raw = spark.table(BRONZE_ECB_FX_TABLE)
-df_fx_raw.printSchema()
-df_fx_raw.summary().show(vertical = True)
+df_gdp_raw = spark.table(BRONZE_GDP_TABLE)
+df_gdp_raw.show(df_gdp_raw.count(), truncate=False)
+df_gdp_raw.printSchema()
+df_gdp_raw.summary().show(truncate=False)
 
 
 # METADATA ********************
@@ -55,17 +56,15 @@ df_fx_raw.summary().show(vertical = True)
 # CELL ********************
 
 RENAMED_COLUMNS = {
-"TIME_PERIOD" : "rate_date",
-"CURRENCY" : "currency",
-"CURRENCY_DENOM" : "currency_denom",
-"OBS_VALUE" : "exchange_rate",
-"OBS_STATUS" : "obs_status"
+"date" : "year",
+"countryiso3code" : "country_code",
 }
-df_fx_silver = df_fx_raw.select("TIME_PERIOD","CURRENCY","CURRENCY_DENOM","OBS_VALUE","OBS_STATUS")
-df_fx_silver = df_fx_silver.withColumnsRenamed(RENAMED_COLUMNS)
-df_fx_silver = df_fx_silver.withColumn("exchange_rate",F.col("exchange_rate").cast(DecimalType(10,4)))
-df_fx_silver.printSchema()
-df_fx_silver.show(df_fx_silver.count(),truncate=False)
+df_gdp_silver = df_gdp_raw.withColumnsRenamed(RENAMED_COLUMNS)
+df_gdp_silver = df_gdp_silver.select("year","country_code","country_name","indicator_id","indicator_name","value")
+df_gdp_silver = df_gdp_silver.withColumn("value",F.col("value").cast(DecimalType(18,2)))
+
+df_gdp_silver.printSchema()
+
 
 
 # METADATA ********************
@@ -81,24 +80,25 @@ df_fx_silver.show(df_fx_silver.count(),truncate=False)
 
 # CELL ********************
 
-FX_DQ_RULES = [F.when((F.col("rate_date").isNull()), "INVALID_DATE"),
-               F.when(F.col("exchange_rate").isNull() | (F.col("exchange_rate") <= 0), "INVALID_EXCHANGE_RATE")]
+GDP_DQ_RULES = [ F.when(F.col("country_code").isNull(), "NULL_KEY"),
+                F.when(F.col("year").isNull(), "INVALID_YEAR"),
+               F.when(F.col("value").isNull() | (F.col("value") <= 0), "INVALID_GDP")]
 
-def flag_fx_quality(df):
+def flag_gdp_quality(df):
     errors = F.concat_ws(
-        ", ", *FX_DQ_RULES)
+        ", ", *GDP_DQ_RULES)
     return df.withColumn("dq_error_reason", F.when(errors == "", "OK").otherwise(errors))
 
 
-df_fx_total= flag_fx_quality(df_fx_silver)
-total = df_fx_total.count()
+df_gdp_total= flag_gdp_quality(df_gdp_silver)
+total = df_gdp_total.count()
 
-summary = df_fx_total.groupBy("dq_error_reason").count()
+summary = df_gdp_total.groupBy("dq_error_reason").count()
 summary = summary.withColumn("percent", F.round(F.col("count") / total * 100, 2))
 
-df_fx_clean = df_fx_total.filter(F.col("dq_error_reason") == "OK").drop("dq_error_reason","obs_status")
+df_gdp_clean = df_gdp_total.filter(F.col("dq_error_reason") == "OK").drop("dq_error_reason","obs_status")
 
-df_fx_quarantine = df_fx_total.filter(F.col("dq_error_reason") != "OK")
+# df_gdp_quarantine = df_gdp_total.filter(F.col("dq_error_reason") != "OK")
 summary.show(truncate=False)
 
 # METADATA ********************
@@ -114,9 +114,9 @@ summary.show(truncate=False)
 
 # CELL ********************
 
-df_fx_dedup = df_fx_clean.dropDuplicates(["rate_date"])
-df_fx_dedup.show()
-print(f"{df_fx_clean.count()} | {df_fx_dedup.count()}")
+df_gdp_dedup = df_gdp_clean.dropDuplicates(["year", "country_code", "indicator_id"])
+df_gdp_dedup.show()
+print(f"{df_gdp_clean.count()} | {df_gdp_dedup.count()}")
 
 # METADATA ********************
 
@@ -131,21 +131,22 @@ print(f"{df_fx_clean.count()} | {df_fx_dedup.count()}")
 
 # CELL ********************
 
-(df_fx_dedup.write
+(df_gdp_dedup.write
     .format("delta")
     .mode("overwrite")
     .option("overwriteSchema","true")
-    .saveAsTable(SILVER_ECB_FX_TABLE))
+    .saveAsTable(SILVER_GDP_TABLE))
 
-(df_fx_quarantine.write
-    .format("delta")
-    .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_ECB_FX_QUARANTINE))
+# if df_gdp_quarantine.count() > 0:
+#     (df_gdp_quarantine.write
+#         .format("delta")
+#         .mode("overwrite")
+#         .option("overwriteSchema","true")
+#         .saveAsTable(SILVER_GDP_QUARANTINE))
 
 spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
-print(spark.table(SILVER_ECB_FX_TABLE).count())
-print(spark.table(SILVER_ECB_FX_QUARANTINE).count())
+print(spark.table(SILVER_GDP_TABLE).count())
+# print(spark.table(SILVER_GDP_QUARANTINE).count())
 
 # METADATA ********************
 

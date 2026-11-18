@@ -38,16 +38,8 @@ SILVER_ECB_FX_QUARANTINE = "lakehouse_silver.dbo.silver_ecb_fx_quarantine"
 
 df_fx_raw = spark.table(BRONZE_ECB_FX_TABLE)
 df_fx_raw.printSchema()
-
-# display(df_fx_raw.summary())
 df_fx_raw.summary().show(vertical = True)
-# # df_fx_raw.select("TIME_PERIOD", "OBS_VALUE", "CURRENCY", "CURRENCY_DENOM", "OBS_STATUS").show(10)
-# df_fx_raw.select(F.min("TIME_PERIOD"),F.max("TIME_PERIOD")).show()
-# df_fx_raw.count()
-# df_fx_raw.agg(F.count("*"), F.count_if(F.col("OBS_VALUE").isNull()), F.min("OBS_VALUE"), F.max("OBS_VALUE")).show()
-# df_fx_raw.select("CURRENCY", "CURRENCY_DENOM").distinct().show()
-# df_fx_raw.groupBy("OBS_STATUS").count().show()
-# df_fx_raw.select("")
+
 
 # MARKDOWN ********************
 
@@ -90,7 +82,8 @@ total = df_fx_total.count()
 summary = df_fx_total.groupBy("dq_error_reason").count()
 summary = summary.withColumn("percent", F.round(F.col("count") / total * 100, 2))
 
-df_fx_clean = df_fx_total.filter(F.col("dq_error_reason") == "OK")
+df_fx_clean = df_fx_total.filter(F.col("dq_error_reason") == "OK").drop("dq_error_reason","obs_status")
+
 df_fx_quarantine = df_fx_total.filter(F.col("dq_error_reason") != "OK")
 summary.show(truncate=False)
 
@@ -101,6 +94,7 @@ summary.show(truncate=False)
 # CELL ********************
 
 df_fx_dedup = df_fx_clean.dropDuplicates(["rate_date"])
+df_fx_dedup.show()
 print(f"{df_fx_clean.count()} | {df_fx_dedup.count()}")
 
 # MARKDOWN ********************

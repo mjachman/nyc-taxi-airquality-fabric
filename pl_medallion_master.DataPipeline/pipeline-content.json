@@ -1,0 +1,341 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "RefreshDataflow",
+        "typeProperties": {
+          "dataflowId": "58e2d8f7-273f-becc-4ff3-07c1e547d189",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "notifyOption": "NoNotification",
+          "dataflowType": "DataflowFabric",
+          "executeMashupQueriesOnly": true
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "df_taxi_zones",
+        "dependsOn": []
+      },
+      {
+        "type": "RefreshDataflow",
+        "typeProperties": {
+          "dataflowId": "8e25f52f-c8ad-b9b2-434b-2c9119834bfe",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "notifyOption": "NoNotification",
+          "dataflowType": "DataflowFabric",
+          "executeMashupQueriesOnly": true
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "df_gdp",
+        "dependsOn": [
+          {
+            "activity": "df_taxi_zones",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "RefreshDataflow",
+        "typeProperties": {
+          "dataflowId": "9c8e6a3f-16fd-b631-4960-a552bab35cad",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "notifyOption": "NoNotification",
+          "dataflowType": "DataflowFabric",
+          "executeMashupQueriesOnly": true
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "df_fx",
+        "dependsOn": [
+          {
+            "activity": "df_gdp",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "RefreshDataflow",
+        "typeProperties": {
+          "dataflowId": "6aa732cc-2c0c-abd8-4ff4-96680463e1a2",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "notifyOption": "NoNotification",
+          "dataflowType": "DataflowFabric",
+          "parameters": {
+            "EndDate": {
+              "value": "2026-01-31",
+              "type": "Date"
+            },
+            "StartDate": {
+              "value": "2024-01-01",
+              "type": "Date"
+            },
+            "OpenAQApiKey": {
+              "value": {
+                "value": "@pipeline().parameters.OpenAQAPiKey",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          },
+          "executeMashupQueriesOnly": true
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "df_openaq",
+        "dependsOn": [
+          {
+            "activity": "df_fx",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "27616ea4-6de4-81b2-47d2-92f60e1837b7",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "silver"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "nb_silver_transform_zones",
+        "dependsOn": [
+          {
+            "activity": "df_openaq",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "5378fd0b-11ae-a127-4f54-1d5f37ebf4f9",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "silver"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "nb_silver_transform_taxi",
+        "dependsOn": [
+          {
+            "activity": "nb_silver_transform_openaq_measurements",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "6824cd1a-b949-ad50-4c17-06ff068e672b",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "silver"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "nb_silver_transform_openaq_measurements",
+        "dependsOn": [
+          {
+            "activity": "nb_silver_transform_openaq_locations",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "0e735015-fc42-86cb-47e7-71b246c02a37",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "silver"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "nb_silver_transform_openaq_locations",
+        "dependsOn": [
+          {
+            "activity": "nb_silver_transform_fx",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "052d7192-1400-be53-469d-0de5ca9b7681",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "silver"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "nb_silver_transform_gdp",
+        "dependsOn": [
+          {
+            "activity": "nb_silver_transform_zones",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "a95c9b6c-d037-92d9-4af2-cf5c6e0c6c89",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "silver"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "nb_silver_transform_fx",
+        "dependsOn": [
+          {
+            "activity": "nb_silver_transform_gdp",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SqlServerStoredProcedure",
+        "typeProperties": {
+          "storedProcedureName": "[dbo].[usp_LoadGoldDims]"
+        },
+        "linkedService": {
+          "name": "warehouse_gold",
+          "properties": {
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "artifactId": "07afc959-39ef-8a81-4d5f-1df8514b4ba4",
+              "endpoint": "2eol7tt5rmiuvbaif7hqtapkli-yq4el56a4fburd6rty27sof27i.datawarehouse.fabric.microsoft.com",
+              "workspaceId": "00000000-0000-0000-0000-000000000000"
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "gold_dims",
+        "dependsOn": [
+          {
+            "activity": "nb_silver_transform_taxi",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SqlServerStoredProcedure",
+        "typeProperties": {
+          "storedProcedureName": "[dbo].[usp_LoadGoldFacts]"
+        },
+        "linkedService": {
+          "name": "warehouse_gold",
+          "properties": {
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "artifactId": "07afc959-39ef-8a81-4d5f-1df8514b4ba4",
+              "endpoint": "2eol7tt5rmiuvbaif7hqtapkli-yq4el56a4fburd6rty27sof27i.datawarehouse.fabric.microsoft.com",
+              "workspaceId": "00000000-0000-0000-0000-000000000000"
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "gold_facts",
+        "dependsOn": [
+          {
+            "activity": "gold_dims",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "OpenAQAPiKey": {
+        "type": "securestring",
+        "defaultValue": {
+          "type": "SecureString",
+          "value": "**********"
+        }
+      }
+    }
+  }
+}

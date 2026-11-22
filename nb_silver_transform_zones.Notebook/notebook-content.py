@@ -8,8 +8,8 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "d6dfd742-9000-4d7b-9a4c-adb901a08cea",
-# META       "default_lakehouse_name": "lakehouse_bronze",
+# META       "default_lakehouse": "5a848d1d-c899-496e-81db-b9757457af41",
+# META       "default_lakehouse_name": "lakehouse_silver",
 # META       "default_lakehouse_workspace_id": "f74538c4-e1c0-4843-8fd1-9e35f938bafa",
 # META       "known_lakehouses": [
 # META         {
@@ -70,6 +70,13 @@ df_zones_silver.printSchema()
 
 
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # MARKDOWN ********************
 
 # ## [2] QUALITY GATE
@@ -78,6 +85,13 @@ df_zones_silver.printSchema()
 
 df_zones_raw.summary("count", "min", "max").show(truncate=False)
 df_zones_raw.select("LocationID").distinct().count()
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # MARKDOWN ********************
 
@@ -93,3 +107,10 @@ df_zones_raw.select("LocationID").distinct().count()
 
 spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
 print(spark.table(SILVER_ZONES_TABLE).count())
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }

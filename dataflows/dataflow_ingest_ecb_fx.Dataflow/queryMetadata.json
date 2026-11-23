@@ -7,15 +7,15 @@
   "queryGroups": [],
   "documentLocale": "en-US",
   "queriesMetadata": {
-    "bronze_ecb_fx": {
-      "queryId": "086bb26c-3179-45e8-bf34-82b70ed21e12",
-      "queryName": "bronze_ecb_fx",
-      "loadEnabled": false
-    },
     "Query1_DataDestination": {
       "queryId": "1863e6e2-5c1c-4238-8e3f-a50d4449d44f",
       "queryName": "Query1_DataDestination",
       "isHidden": true,
+      "loadEnabled": false
+    },
+    "bronze_ecb_fx": {
+      "queryId": "086bb26c-3179-45e8-bf34-82b70ed21e12",
+      "queryName": "bronze_ecb_fx",
       "loadEnabled": false
     }
   },

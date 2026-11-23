@@ -29,14 +29,12 @@
 
 # CELL ********************
 
-from pyspark.sql import functions as F 
+from pyspark.sql import functions as F
 from pyspark.sql.types import DecimalType
-from pyspark.sql.types import TimestampType
 
 BRONZE_TAXI_PATH = "abfss://FabricCourseProject@onelake.dfs.fabric.microsoft.com/lakehouse_bronze.Lakehouse/Files/taxi"
 SILVER_TAXI_TABLE = "lakehouse_silver.dbo.silver_taxi_trips"
 SILVER_QUARANTINE_TABLE = "lakehouse_silver.dbo.silver_taxi_quarantine"
-ALLOWED_MONTHS = ["2024-01", "2025-01", "2026-01"]
 MAX_TRIP_DISTANCE = 500
 MAX_FARE = 5000
 MAX_DURATION_SECONDS = 86400
@@ -54,7 +52,7 @@ print(df_raw_taxi.count())
 
 # CELL ********************
 
-display(df_raw_taxi.summary().toPandas().set_index("summary").T.reset_index())
+df_raw_taxi.summary().show(vertical=True)
 
 # METADATA ********************
 
@@ -100,19 +98,21 @@ def rename_columns(df, rename_dict):
    return df.withColumnsRenamed(rename_dict)
 
 def convert_ntz_to_timestamp(df):
-    changes = {
-        field.name: F.col(field.name).cast("timestamp")
-        for field in df.schema.fields
-        if field.dataType.simpleString() == "timestamp_ntz"
-    }
+    changes = {}
+    for field in df.schema.fields:
+        if field.dataType.simpleString() == "timestamp_ntz":
+            changes[field.name] = F.col(field.name).cast("timestamp")
     return df.withColumns(changes) if changes else df
 
 
-
 df_taxi_silver = cast_money_columns(df_raw_taxi, money_columns)
-df_taxi_silver = rename_columns(df_taxi_silver,non_snake_case_columns_replacement_dict)
+df_taxi_silver = rename_columns(df_taxi_silver, non_snake_case_columns_replacement_dict)
 df_taxi_silver = convert_ntz_to_timestamp(df_taxi_silver)
 df_taxi_silver = df_taxi_silver.fillna({"cbd_congestion_fee": 0})
+df_taxi_silver = df_taxi_silver.withColumn(
+    "expected_month",
+    F.regexp_extract(F.input_file_name(), r"(\d{4}-\d{2})\.parquet", 1),
+)
 df_taxi_silver.printSchema()
 
 
@@ -131,7 +131,7 @@ df_taxi_silver.printSchema()
 
 TAXI_DQ_RULES = [ F.when((F.col("fare_amount") < 0) | (F.col("total_amount") < 0), "NEGATIVE_FARE"),
         F.when(F.col("tpep_dropoff_datetime") <= F.col("tpep_pickup_datetime"), "INVALID_TIME"),
-        F.when(~F.date_format(F.col("tpep_pickup_datetime"),"yyyy-MM").isin(ALLOWED_MONTHS), "INVALID_DATE"),
+        F.when(F.date_format(F.col("tpep_pickup_datetime"), "yyyy-MM") != F.col("expected_month"), "INVALID_DATE"),
         F.when(F.col("trip_distance")>MAX_TRIP_DISTANCE,"INVALID_DISTANCE"),
         F.when(F.col("fare_amount")>MAX_FARE,"EXTREME_FARE"),
         F.when(F.unix_timestamp(F.col("tpep_dropoff_datetime")) - F.unix_timestamp(F.col("tpep_pickup_datetime")) > MAX_DURATION_SECONDS,"EXTREME_DURATION")]
@@ -194,8 +194,8 @@ print(f"Dropped duplicates: {before_count - after_count}")
 
 # CELL ********************
 
-df_taxi_clean = df_taxi_clean.withColumn("pickup_date",F.to_date(F.col("tpep_pickup_datetime")))
-df_taxi_clean = df_taxi_clean.drop("dq_error_reason")
+df_taxi_clean = df_taxi_clean.withColumn("pickup_date", F.to_date(F.col("tpep_pickup_datetime")))
+df_taxi_clean = df_taxi_clean.drop("dq_error_reason", "expected_month")
 df_taxi_clean = df_taxi_clean.withColumn(
     "trip_duration_minutes",
     F.round(
@@ -203,7 +203,6 @@ df_taxi_clean = df_taxi_clean.withColumn(
         2,
     ),
 )
-display(df_taxi_clean)
 print(df_taxi_clean.count())
 df_taxi_clean.printSchema()
 

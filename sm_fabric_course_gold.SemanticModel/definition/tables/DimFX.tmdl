@@ -1,0 +1,68 @@
+table DimFX
+	lineageTag: 74630735-3f90-4227-8b8d-c9225fd2d7fb
+	sourceLineageTag: [dbo].[DimFX]
+
+	column rate_date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: date
+		lineageTag: 61252985-a69f-471f-a7b8-5cd415f46759
+		sourceLineageTag: rate_date
+		summarizeBy: none
+		sourceColumn: rate_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column currency
+		dataType: string
+		sourceProviderType: char
+		lineageTag: b1be9f0f-c43a-495e-b7e0-8842526efdc5
+		sourceLineageTag: currency
+		summarizeBy: none
+		sourceColumn: currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column currency_denom
+		dataType: string
+		sourceProviderType: char
+		lineageTag: 397a067b-ceba-47d1-b2b8-84c793e8c91a
+		sourceLineageTag: currency_denom
+		summarizeBy: none
+		sourceColumn: currency_denom
+
+		annotation SummarizationSetBy = Automatic
+
+	column exchange_rate
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(10, 4)
+		lineageTag: d1d19626-0f2f-4e9e-875e-89587f953a9d
+		sourceLineageTag: exchange_rate
+		summarizeBy: none
+		sourceColumn: exchange_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column is_carried_forward
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		sourceProviderType: bit
+		lineageTag: 525bb9de-17ea-47f6-b57e-326140bec551
+		sourceLineageTag: is_carried_forward
+		summarizeBy: none
+		sourceColumn: is_carried_forward
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimFX = entity
+		mode: directLake
+		source
+			entityName: DimFX
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

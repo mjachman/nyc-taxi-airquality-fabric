@@ -38,8 +38,8 @@ shared bronze_openaq_measurements = let
   #"Changed column type" = Table.TransformColumnTypes(#"Expanded flagInfo", {{"value", type number}, {"summary.min", type number}, {"summary.q02", type number}, {"summary.q25", type number}, {"summary.median", type number}, {"summary.q75", type number}, {"summary.q98", type number}, {"summary.max", type number}, {"summary.avg", type number}, {"summary.sd", type number}, {"percentComplete", type number}, {"percentCoverage", type number}, {"hasFlags", type logical}, {"utc", type datetime}, {"local", type text}, {"expectedInterval", type text}, {"observedInterval", type text}, {"expectedCount", Int64.Type}, {"observedCount", Int64.Type}})
 in
   #"Changed column type";
-shared EndDate = #date(2026, 1, 31) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
-shared StartDate = #date(2024, 1, 1) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
+shared StartDate = #date(2023, 1, 1) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
+shared EndDate = #date(2025, 1, 31) meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = type date];
 shared bronze_openaq_locations_DataDestination = let
   Pattern = Lakehouse.Contents([HierarchicalNavigation = true, EnableVorder = true, OutputMetadataRefresh = true, CreateNavigationProperties = false, EnableFolding = false]),
   Navigation_1 = Pattern{[workspaceId = "f74538c4-e1c0-4843-8fd1-9e35f938bafa"]}[Data],
@@ -61,8 +61,16 @@ shared GetSensorDays = (sensorId as number) as list =>
 let
   BaseUrl = "https://api.openaq.org/v3",
   ApiKey = OpenAQApiKey,
-  Options = [RelativePath = "sensors/" & Text.From(sensorId) & "/days", Query= [date_from = Date.ToText(StartDate, "yyyy-MM-dd"), date_to = Date.ToText(EndDate, "yyyy-MM-dd"), limit = "1000"], Headers = [#"X-API-Key" = ApiKey]],
-  CallApi = () => try Json.Document(Web.Contents(BaseUrl, Options))[results] otherwise {},
-  Response = Function.InvokeAfter(CallApi, #duration(0, 0, 0, 1.1))
+  FetchPage = (pageNum as number) as list =>
+    let
+      Options = [
+        RelativePath = "sensors/" & Text.From(sensorId) & "/days",
+        Query = [date_from = Date.ToText(StartDate, "yyyy-MM-dd"), date_to = Date.ToText(EndDate, "yyyy-MM-dd"), limit = "1000", page = Text.From(pageNum)],
+        Headers = [#"X-API-Key" = ApiKey]
+      ]
+    in
+      Function.InvokeAfter(() => try Json.Document(Web.Contents(BaseUrl, Options))[results] otherwise {}, #duration(0, 0, 0, 1.1)),
+  Page1 = FetchPage(1),
+  Page2 = if List.Count(Page1) = 1000 then FetchPage(2) else {}
 in
- Response;
+  Page1 & Page2;

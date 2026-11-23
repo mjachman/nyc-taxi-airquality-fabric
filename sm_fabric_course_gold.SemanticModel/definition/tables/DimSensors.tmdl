@@ -1,0 +1,100 @@
+table DimSensors
+	lineageTag: 9f8058ed-61a9-465c-b3f0-9e40bc0fa060
+	sourceLineageTag: [dbo].[DimSensors]
+
+	column sensor_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: 71bebd30-bb74-4eae-83ed-d3e24eea2d50
+		sourceLineageTag: sensor_id
+		summarizeBy: none
+		sourceColumn: sensor_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column location_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: b46c0dcb-e618-4c9a-8e45-8117cf97efd9
+		sourceLineageTag: location_id
+		summarizeBy: none
+		sourceColumn: location_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column station_name
+		dataType: string
+		sourceProviderType: varchar(100)
+		lineageTag: fb2459c2-7942-4c7c-94e3-a59a9307f1b2
+		sourceLineageTag: station_name
+		summarizeBy: none
+		sourceColumn: station_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column parameter
+		dataType: string
+		sourceProviderType: varchar(20)
+		lineageTag: 61b4fe67-73d2-4684-b749-eea454ab948c
+		sourceLineageTag: parameter
+		summarizeBy: none
+		sourceColumn: parameter
+
+		annotation SummarizationSetBy = Automatic
+
+	column units
+		dataType: string
+		sourceProviderType: varchar(15)
+		lineageTag: b6f2a15d-b82f-4939-ac77-b535f29d7bf0
+		sourceLineageTag: units
+		summarizeBy: none
+		sourceColumn: units
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_monitor
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		sourceProviderType: bit
+		lineageTag: d895d032-5788-4ea7-8755-179c46af5a44
+		sourceLineageTag: is_monitor
+		summarizeBy: none
+		sourceColumn: is_monitor
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		dataType: double
+		sourceProviderType: decimal(9, 6)
+		lineageTag: 63888f14-e911-409a-9553-314d5b40afdc
+		sourceLineageTag: latitude
+		summarizeBy: none
+		sourceColumn: latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column longitude
+		dataType: double
+		sourceProviderType: decimal(9, 6)
+		lineageTag: b0864d54-da3a-4f0b-93f4-1982e64e418a
+		sourceLineageTag: longitude
+		summarizeBy: none
+		sourceColumn: longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition DimSensors = entity
+		mode: directLake
+		source
+			entityName: DimSensors
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

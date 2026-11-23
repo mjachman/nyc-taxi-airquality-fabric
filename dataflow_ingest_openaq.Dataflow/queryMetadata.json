@@ -7,24 +7,29 @@
   "queryGroups": [],
   "documentLocale": "en-US",
   "queriesMetadata": {
-    "bronze_openaq_locations": {
-      "queryId": "526cefa2-e2b1-4a58-bf3d-fc757962c3c2",
-      "queryName": "bronze_openaq_locations",
-      "loadEnabled": false
-    },
-    "bronze_openaq_measurements": {
-      "queryId": "07c9c19d-f074-4553-b055-d99f2b2e829f",
-      "queryName": "bronze_openaq_measurements",
-      "loadEnabled": false
-    },
     "EndDate": {
       "queryId": "d0309d01-dbf3-4a38-aeac-612f16bd03e9",
       "queryName": "EndDate",
       "loadEnabled": false
     },
+    "GetSensorDays": {
+      "queryId": "48f4b02f-b501-481a-a1ee-9ff30f32b832",
+      "queryName": "GetSensorDays",
+      "loadEnabled": false
+    },
+    "OpenAQApiKey": {
+      "queryId": "ac6e967e-91a4-44e7-9ec5-0ab0152469d8",
+      "queryName": "OpenAQApiKey",
+      "loadEnabled": false
+    },
     "StartDate": {
       "queryId": "86afa6ce-f560-4bca-ba07-86294477f834",
       "queryName": "StartDate",
+      "loadEnabled": false
+    },
+    "bronze_openaq_locations": {
+      "queryId": "526cefa2-e2b1-4a58-bf3d-fc757962c3c2",
+      "queryName": "bronze_openaq_locations",
       "loadEnabled": false
     },
     "bronze_openaq_locations_DataDestination": {
@@ -33,20 +38,15 @@
       "isHidden": true,
       "loadEnabled": false
     },
-    "OpenAQApiKey": {
-      "queryId": "ac6e967e-91a4-44e7-9ec5-0ab0152469d8",
-      "queryName": "OpenAQApiKey",
+    "bronze_openaq_measurements": {
+      "queryId": "07c9c19d-f074-4553-b055-d99f2b2e829f",
+      "queryName": "bronze_openaq_measurements",
       "loadEnabled": false
     },
     "bronze_openaq_measurements_DataDestination": {
       "queryId": "270d072e-ffe1-43fe-ae84-f8c1a5e49d9a",
       "queryName": "bronze_openaq_measurements_DataDestination",
       "isHidden": true,
-      "loadEnabled": false
-    },
-    "GetSensorDays": {
-      "queryId": "48f4b02f-b501-481a-a1ee-9ff30f32b832",
-      "queryName": "GetSensorDays",
       "loadEnabled": false
     }
   },

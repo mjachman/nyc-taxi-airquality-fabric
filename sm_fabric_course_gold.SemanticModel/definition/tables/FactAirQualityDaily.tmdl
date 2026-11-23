@@ -1,0 +1,111 @@
+table FactAirQualityDaily
+	lineageTag: ae83f3fa-c867-4725-b6bd-ed9acb2c9f07
+	sourceLineageTag: [dbo].[FactAirQualityDaily]
+
+	column date
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: date
+		lineageTag: 8ad1dd9b-aa81-4b30-8979-965ec5204336
+		sourceLineageTag: date
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+	column sensor_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: bigint
+		lineageTag: c7382177-0dce-49c8-b60b-8d996f2e001b
+		sourceLineageTag: sensor_id
+		summarizeBy: none
+		sourceColumn: sensor_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_value
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(12, 4)
+		lineageTag: b86f62f3-205e-4891-abf8-70835ba7631f
+		sourceLineageTag: avg_value
+		summarizeBy: sum
+		sourceColumn: avg_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column min_value
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(12, 4)
+		lineageTag: 41233826-b4da-42a2-9e63-b89ca5bd43d3
+		sourceLineageTag: min_value
+		summarizeBy: sum
+		sourceColumn: min_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column max_value
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(12, 4)
+		lineageTag: ddd30da4-919e-4cef-8830-3a566bb73980
+		sourceLineageTag: max_value
+		summarizeBy: sum
+		sourceColumn: max_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column median_value
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(12, 4)
+		lineageTag: 38ebf9ee-81dc-4539-b822-14d51110314d
+		sourceLineageTag: median_value
+		summarizeBy: sum
+		sourceColumn: median_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column observed_count
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 16f9d3d9-912d-469a-9431-94c832d7c3c5
+		sourceLineageTag: observed_count
+		summarizeBy: sum
+		sourceColumn: observed_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column percent_coverage
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(5, 2)
+		lineageTag: e4ab017e-30a1-4128-9b38-3473920fc025
+		sourceLineageTag: percent_coverage
+		summarizeBy: sum
+		sourceColumn: percent_coverage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	partition FactAirQualityDaily = entity
+		mode: directLake
+		source
+			entityName: FactAirQualityDaily
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

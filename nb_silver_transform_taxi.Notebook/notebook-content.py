@@ -25,21 +25,48 @@
 
 # MARKDOWN ********************
 
+# # Silver Transform: NYC Taxi Trips
+
+# MARKDOWN ********************
+
 # ## [0] PROFILE
 
 # CELL ********************
 
+import re
 from pyspark.sql import functions as F
 from pyspark.sql.types import DecimalType
 
 BRONZE_TAXI_PATH = "abfss://FabricCourseProject@onelake.dfs.fabric.microsoft.com/lakehouse_bronze.Lakehouse/Files/taxi"
 SILVER_TAXI_TABLE = "lakehouse_silver.dbo.silver_taxi_trips"
 SILVER_QUARANTINE_TABLE = "lakehouse_silver.dbo.silver_taxi_quarantine"
+
 MAX_TRIP_DISTANCE = 500
 MAX_FARE = 5000
 MAX_DURATION_SECONDS = 86400
 
-df_raw_taxi = spark.read.option("mergeSchema", "true").parquet(BRONZE_TAXI_PATH)
+INT_COLUMNS = ["vendor_id", "pu_location_id", "do_location_id", "passenger_count", "ratecode_id", "payment_type"]
+RENAMED_BRONZE = {
+    "VendorID": "vendor_id",
+    "RatecodeID": "ratecode_id",
+    "PULocationID": "pu_location_id",
+    "DOLocationID": "do_location_id",
+    "Airport_fee": "airport_fee",
+}
+
+def read_taxi_file(file_info):
+    df = spark.read.parquet(file_info.path).withColumnsRenamed(RENAMED_BRONZE)
+    for col_name in INT_COLUMNS:
+        df = df.withColumn(col_name, F.col(col_name).cast("bigint"))
+    month_tag = re.search(r"\d{4}-\d{2}", file_info.name).group(0)
+    return df.withColumn("expected_month", F.lit(month_tag))
+
+df_raw_taxi = None
+
+for file_info in mssparkutils.fs.ls(BRONZE_TAXI_PATH):
+    if file_info.name.endswith(".parquet"):
+        df_part = read_taxi_file(file_info)
+        df_raw_taxi = df_part if df_raw_taxi is None else df_raw_taxi.unionByName(df_part, allowMissingColumns=True)
 df_raw_taxi.printSchema()
 print(df_raw_taxi.count())
 
@@ -67,7 +94,7 @@ df_raw_taxi.summary().show(vertical=True)
 
 # CELL ********************
 
-money_columns = [
+MONEY_COLUMNS = [
     "fare_amount",
     "extra",
     "mta_tax",
@@ -76,26 +103,18 @@ money_columns = [
     "improvement_surcharge",
     "total_amount",
     "congestion_surcharge",
-    "Airport_fee",
-    "cbd_congestion_fee"
+    "airport_fee",
+    "cbd_congestion_fee",
 ]
-
-non_snake_case_columns_replacement_dict = {
-    "VendorID": "vendor_id",
-    "RatecodeID" : "ratecode_id",
-    "PULocationID" : "pu_location_id",
-    "DOLocationID" : "do_location_id",
-    "Airport_fee" : "airport_fee"
-}
 
 def cast_money_columns(df, columns):
     changes = {}
     for c in columns:
-        changes[c] = F.col(c).cast(DecimalType(10,2))
+        if c in df.columns:
+            changes[c] = F.col(c).cast(DecimalType(10, 2))
+        else:
+            changes[c] = F.lit(0).cast(DecimalType(10, 2))
     return df.withColumns(changes)
-
-def rename_columns(df, rename_dict):
-   return df.withColumnsRenamed(rename_dict)
 
 def convert_ntz_to_timestamp(df):
     changes = {}
@@ -104,17 +123,10 @@ def convert_ntz_to_timestamp(df):
             changes[field.name] = F.col(field.name).cast("timestamp")
     return df.withColumns(changes) if changes else df
 
-
-df_taxi_silver = cast_money_columns(df_raw_taxi, money_columns)
-df_taxi_silver = rename_columns(df_taxi_silver, non_snake_case_columns_replacement_dict)
+df_taxi_silver = cast_money_columns(df_raw_taxi, MONEY_COLUMNS)
 df_taxi_silver = convert_ntz_to_timestamp(df_taxi_silver)
-df_taxi_silver = df_taxi_silver.fillna({"cbd_congestion_fee": 0})
-df_taxi_silver = df_taxi_silver.withColumn(
-    "expected_month",
-    F.regexp_extract(F.input_file_name(), r"(\d{4}-\d{2})\.parquet", 1),
-)
+df_taxi_silver = df_taxi_silver.fillna({"cbd_congestion_fee": 0, "airport_fee": 0})
 df_taxi_silver.printSchema()
-
 
 # METADATA ********************
 
@@ -222,6 +234,13 @@ df_taxi_clean.printSchema()
 df_taxi_clean.select("fare_amount", "total_amount", "trip_distance", "trip_duration_minutes", "pickup_date", "pu_location_id", "do_location_id").summary("count", "min", "max").show()
 df_taxi_clean.select(F.count("pickup_date"),F.min("pickup_date"),F.max("pickup_date")).show()
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
 
 (df_taxi_clean.write
@@ -239,3 +258,10 @@ df_taxi_clean.select(F.count("pickup_date"),F.min("pickup_date"),F.max("pickup_d
 spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
 print(spark.table(SILVER_TAXI_TABLE).count())
 print(spark.table(SILVER_QUARANTINE_TABLE).count())
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }

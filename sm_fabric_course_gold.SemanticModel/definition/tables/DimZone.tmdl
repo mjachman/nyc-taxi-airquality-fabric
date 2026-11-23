@@ -1,0 +1,54 @@
+table DimZone
+	lineageTag: 8becebb9-f543-45a9-a043-8ac7c73be9a6
+	sourceLineageTag: [dbo].[DimZone]
+
+	column location_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 7eebc787-bebb-49eb-843c-e37985a1d8cd
+		sourceLineageTag: location_id
+		summarizeBy: none
+		sourceColumn: location_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column zone
+		dataType: string
+		sourceProviderType: varchar(100)
+		lineageTag: 6abe7b22-205f-40ca-912b-f5c06fc92219
+		sourceLineageTag: zone
+		summarizeBy: none
+		sourceColumn: zone
+
+		annotation SummarizationSetBy = Automatic
+
+	column borough
+		dataType: string
+		sourceProviderType: varchar(30)
+		lineageTag: ae86974a-f0d3-4ad7-ab72-b60d7ec188ff
+		sourceLineageTag: borough
+		summarizeBy: none
+		sourceColumn: borough
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_zone
+		dataType: string
+		sourceProviderType: varchar(30)
+		lineageTag: d6d9606f-535d-4778-95dc-9896ffac4df5
+		sourceLineageTag: service_zone
+		summarizeBy: none
+		sourceColumn: service_zone
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimZone = entity
+		mode: directLake
+		source
+			entityName: DimZone
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

@@ -2,37 +2,108 @@
   "properties": {
     "activities": [
       {
-        "type": "RefreshDataflow",
+        "type": "ForEach",
         "typeProperties": {
-          "dataflowId": "6aa732cc-2c0c-abd8-4ff4-96680463e1a2",
-          "workspaceId": "00000000-0000-0000-0000-000000000000",
-          "notifyOption": "NoNotification",
-          "dataflowType": "DataflowFabric",
-          "executeMashupQueriesOnly": true
+          "isSequential": true,
+          "items": {
+            "value": "@range(0, pipeline().parameters.month_count)",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "type": "Copy",
+              "typeProperties": {
+                "source": {
+                  "type": "BinarySource",
+                  "formatSettings": {
+                    "type": "BinaryReadSettings"
+                  },
+                  "storeSettings": {
+                    "type": "HttpReadSettings",
+                    "requestMethod": "GET"
+                  },
+                  "datasetSettings": {
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "HttpServerLocation",
+                        "relativeUrl": {
+                          "value": "@concat('trip-data/', pipeline().parameters.taxi_type, '_tripdata_', formatDateTime(addToTime(pipeline().parameters.start_date, item(), 'Month'), 'yyyy-MM'), '.parquet')",
+                          "type": "Expression"
+                        }
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "eaf01432-6914-4f9e-bbc9-6c2e3cf0be87"
+                    },
+                    "annotations": []
+                  }
+                },
+                "sink": {
+                  "type": "BinarySink",
+                  "storeSettings": {
+                    "type": "LakehouseWriteSettings"
+                  },
+                  "datasetSettings": {
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "LakehouseLocation",
+                        "folderPath": "taxi",
+                        "fileName": {
+                          "value": "@concat(pipeline().parameters.taxi_type, '_tripdata_', formatDateTime(addToTime(pipeline().parameters.start_date, item(), 'Month'), 'yyyy-MM'), '.parquet')",
+                          "type": "Expression"
+                        }
+                      }
+                    },
+                    "connectionSettings": {
+                      "name": "lakehouse_bronze",
+                      "properties": {
+                        "type": "Lakehouse",
+                        "typeProperties": {
+                          "artifactId": "01a08cea-adb9-9a4c-4d7b-9000d6dfd742",
+                          "workspaceId": "00000000-0000-0000-0000-000000000000",
+                          "rootFolder": "Files"
+                        },
+                        "externalReferences": {
+                          "connection": "bc6b3533-6631-46d8-a440-ff243b676cdd"
+                        },
+                        "annotations": []
+                      }
+                    },
+                    "annotations": []
+                  }
+                },
+                "enableStaging": false
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "copy taxi parquets",
+              "dependsOn": []
+            }
+          ]
         },
-        "policy": {
-          "timeout": "0.12:00:00",
-          "retry": 0,
-          "retryIntervalInSeconds": 30,
-          "secureInput": false,
-          "secureOutput": false
-        },
-        "name": "dataflow_ingest_openaq",
+        "name": "ForEach1",
         "dependsOn": []
       }
     ],
     "parameters": {
-      "periods_to_ingest": {
-        "type": "array",
-        "defaultValue": [
-          "2024-01",
-          "2025-01",
-          "2026-01"
-        ]
-      },
       "taxi_type": {
         "type": "string",
         "defaultValue": "yellow"
+      },
+      "start_date": {
+        "type": "string",
+        "defaultValue": "2023-01-01"
+      },
+      "month_count": {
+        "type": "int",
+        "defaultValue": 36
       }
     }
   }

@@ -1,0 +1,90 @@
+table DimDate
+	lineageTag: b4654715-c220-4526-98fe-8069f867326c
+	sourceLineageTag: [dbo].[DimDate]
+	dataCategory: Time
+
+	column date_key
+		dataType: dateTime
+		isKey
+		formatString: General Date
+		sourceProviderType: date
+		lineageTag: 5a0315c7-b207-499f-9741-7ecff8679aec
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 2883c977-4619-4cf8-85b0-f5d5fea04fa8
+		sourceLineageTag: year
+		summarizeBy: sum
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_num
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: db2fbf1e-2440-44e6-ba22-4350e3742db4
+		sourceLineageTag: month_num
+		summarizeBy: sum
+		sourceColumn: month_num
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: string
+		sourceProviderType: varchar(15)
+		lineageTag: 11f96aa8-b996-442a-8323-802710bf65ef
+		sourceLineageTag: month
+		summarizeBy: none
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column weekday_num
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 2be585ec-bf34-487d-bbac-e401141d27e5
+		sourceLineageTag: weekday_num
+		summarizeBy: sum
+		sourceColumn: weekday_num
+
+		annotation SummarizationSetBy = Automatic
+
+	column weekday
+		dataType: string
+		sourceProviderType: varchar(15)
+		lineageTag: 33b558bb-038f-4bb1-989f-fbb3b4bf6ab1
+		sourceLineageTag: weekday
+		summarizeBy: none
+		sourceColumn: weekday
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_weekend
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		sourceProviderType: bit
+		lineageTag: 1b007366-2342-4dd5-87e4-71568298a0cc
+		sourceLineageTag: is_weekend
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimDate = entity
+		mode: directLake
+		source
+			entityName: DimDate
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

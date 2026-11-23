@@ -69,6 +69,40 @@ BEGIN
     ALTER TABLE dbo.FactTaxiDaily
     ADD CONSTRAINT FK_FactTaxiDaily_GDP
         FOREIGN KEY (year) REFERENCES dbo.DimGDP (year) NOT ENFORCED;
+
+    DROP TABLE IF EXISTS dbo.FactTaxiHourly;
+    CREATE TABLE dbo.FactTaxiHourly AS
+    SELECT
+        ISNULL(CAST(t.pickup_date AS DATE), '1900-01-01')                              AS date_key,
+        ISNULL(DATEPART(HOUR, t.tpep_pickup_datetime), 0)                              AS hour_key,
+        ISNULL(CAST(t.pu_location_id AS INT), -1)                                      AS location_id,
+        CAST(COUNT(*) AS INT)                                                          AS trip_count,
+        CAST(AVG(CAST(t.trip_duration_minutes AS DECIMAL(12, 2))) AS DECIMAL(10, 2))   AS avg_duration_min,
+        CAST(SUM(COALESCE(t.total_amount, 0)) AS DECIMAL(14, 2))                       AS total_amount_usd,
+        CAST(SUM(COALESCE(t.total_amount, 0)) / MAX(fx.exchange_rate) AS DECIMAL(14, 2)) AS total_amount_eur
+    FROM lakehouse_silver.dbo.silver_taxi_trips AS t
+    LEFT JOIN dbo.DimFX AS fx
+        ON t.pickup_date = fx.rate_date
+    GROUP BY
+        t.pickup_date,
+        DATEPART(HOUR, t.tpep_pickup_datetime),
+        t.pu_location_id;
+
+    ALTER TABLE dbo.FactTaxiHourly
+    ADD CONSTRAINT PK_FactTaxiHourly
+        PRIMARY KEY NONCLUSTERED (date_key, hour_key, location_id) NOT ENFORCED;
+
+    ALTER TABLE dbo.FactTaxiHourly
+    ADD CONSTRAINT FK_FactTaxiHourly_Date
+        FOREIGN KEY (date_key) REFERENCES dbo.DimDate (date_key) NOT ENFORCED;
+
+    ALTER TABLE dbo.FactTaxiHourly
+    ADD CONSTRAINT FK_FactTaxiHourly_Hour
+        FOREIGN KEY (hour_key) REFERENCES dbo.DimHour (hour_key) NOT ENFORCED;
+
+    ALTER TABLE dbo.FactTaxiHourly
+    ADD CONSTRAINT FK_FactTaxiHourly_Zone
+        FOREIGN KEY (location_id) REFERENCES dbo.DimZone (location_id) NOT ENFORCED;
 END;
 
 GO

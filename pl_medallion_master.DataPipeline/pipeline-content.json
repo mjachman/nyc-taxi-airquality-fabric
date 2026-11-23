@@ -81,11 +81,11 @@
           "dataflowType": "DataflowFabric",
           "parameters": {
             "EndDate": {
-              "value": "2026-01-31",
+              "value": "@pipeline().parameters.EndDate",
               "type": "Date"
             },
             "StartDate": {
-              "value": "2024-01-01",
+              "value": "@pipeline().parameters.StartDate",
               "type": "Date"
             },
             "OpenAQApiKey": {
@@ -132,7 +132,7 @@
         "name": "nb_silver_transform_zones",
         "dependsOn": [
           {
-            "activity": "df_openaq",
+            "activity": "If Condition1",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -142,8 +142,8 @@
       {
         "type": "TridentNotebook",
         "typeProperties": {
-          "notebookId": "5378fd0b-11ae-a127-4f54-1d5f37ebf4f9",
-          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "notebookId": "37ebf4f9-1d5f-4f54-a127-11ae5378fd0b",
+          "workspaceId": "f74538c4-e1c0-4843-8fd1-9e35f938bafa",
           "sessionTag": "silver"
         },
         "policy": {
@@ -154,6 +154,8 @@
           "secureOutput": false
         },
         "name": "nb_silver_transform_taxi",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "nb_silver_transform_openaq_measurements",
@@ -326,6 +328,51 @@
             ]
           }
         ]
+      },
+      {
+        "type": "IfCondition",
+        "typeProperties": {
+          "expression": {
+            "type": "Expression"
+          },
+          "ifTrueActivities": [
+            {
+              "type": "InvokePipeline",
+              "typeProperties": {
+                "parameters": {
+                  "taxi_type": "yellow",
+                  "start_date": "2023-01-01",
+                  "month_count": 36
+                },
+                "waitOnCompletion": true,
+                "workspaceId": "f74538c4-e1c0-4843-8fd1-9e35f938bafa",
+                "pipelineId": "12fec01a-d790-4080-898e-f3870e2995bd",
+                "operationType": "InvokeFabricPipeline"
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Invoke pipeline1",
+              "dependsOn": []
+            }
+          ],
+          "ifFalseActivities": []
+        },
+        "name": "If Condition1",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
+        "dependsOn": [
+          {
+            "activity": "df_openaq",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
       }
     ],
     "parameters": {
@@ -335,6 +382,18 @@
           "type": "SecureString",
           "value": "**********"
         }
+      },
+      "StartDate": {
+        "type": "string",
+        "defaultValue": "2023-01-01"
+      },
+      "EndDate": {
+        "type": "string",
+        "defaultValue": "2025-12-31"
+      },
+      "ingest_taxi_parquet": {
+        "type": "bool",
+        "defaultValue": false
       }
     }
   }

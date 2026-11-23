@@ -5,9 +5,16 @@ BEGIN
 
     DROP TABLE IF EXISTS dbo.FactAirQualityDaily;
     DROP TABLE IF EXISTS dbo.FactTaxiDaily;
+    DROP TABLE IF EXISTS dbo.FactTaxiHourly;
 
-    DECLARE @start_date DATE = '2024-01-01';
-    DECLARE @end_date   DATE = DATEFROMPARTS(YEAR(GETDATE()), 12, 31);
+    DECLARE @min_taxi_date DATE = (SELECT MIN(pickup_date) FROM lakehouse_silver.dbo.silver_taxi_trips);
+    DECLARE @min_aq_date   DATE = (SELECT MIN(measurement_date) FROM lakehouse_silver.dbo.silver_openaq_measurements);
+    DECLARE @min_date      DATE = CASE
+                                      WHEN @min_taxi_date <= @min_aq_date THEN @min_taxi_date
+                                      ELSE @min_aq_date
+                                  END;
+    DECLARE @start_date    DATE = DATEFROMPARTS(YEAR(COALESCE(@min_date, GETDATE())), 1, 1);
+    DECLARE @end_date      DATE = DATEFROMPARTS(YEAR(GETDATE()), 12, 31);
 
     DROP TABLE IF EXISTS #dates;
     CREATE TABLE #dates AS
@@ -127,6 +134,16 @@ BEGIN
 
     ALTER TABLE dbo.DimSensors
     ADD CONSTRAINT PK_DimSensors PRIMARY KEY NONCLUSTERED (sensor_id) NOT ENFORCED;
+
+    DROP TABLE IF EXISTS dbo.DimHour;
+    CREATE TABLE dbo.DimHour AS
+    SELECT
+        ISNULL(CAST(value AS INT), 0) AS hour_key,
+        CAST(RIGHT('0' + CAST(value AS VARCHAR(2)), 2) + ':00' AS CHAR(5)) AS hour_label
+    FROM GENERATE_SERIES(0, 23);
+
+    ALTER TABLE dbo.DimHour
+    ADD CONSTRAINT PK_DimHour PRIMARY KEY NONCLUSTERED (hour_key) NOT ENFORCED;
 END;
 
 GO

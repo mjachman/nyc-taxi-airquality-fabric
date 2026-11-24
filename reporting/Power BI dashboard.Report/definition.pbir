@@ -3,7 +3,7 @@
   "version": "4.0",
   "datasetReference": {
     "byPath": {
-      "path": "../reporting/sm_fabric_course_gold.SemanticModel"
+      "path": "../sm_fabric_course_gold.SemanticModel"
     }
   }
 }

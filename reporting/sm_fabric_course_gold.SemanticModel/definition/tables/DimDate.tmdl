@@ -6,14 +6,22 @@ table DimDate
 	column date_key
 		dataType: dateTime
 		isKey
-		formatString: General Date
+		formatString: dd-mm-yyyy
 		sourceProviderType: date
 		lineageTag: 5a0315c7-b207-499f-9741-7ecff8679aec
 		sourceLineageTag: date_key
 		summarizeBy: none
 		sourceColumn: date_key
 
+		changedProperty = DataType
+
+		changedProperty = FormatString
+
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isCustom":true}
 
 	column year
 		dataType: int64
@@ -44,6 +52,9 @@ table DimDate
 		sourceLineageTag: month
 		summarizeBy: none
 		sourceColumn: month
+		sortByColumn: month_num
+
+		changedProperty = SortByColumn
 
 		annotation SummarizationSetBy = Automatic
 
@@ -65,6 +76,9 @@ table DimDate
 		sourceLineageTag: weekday
 		summarizeBy: none
 		sourceColumn: weekday
+		sortByColumn: weekday_num
+
+		changedProperty = SortByColumn
 
 		annotation SummarizationSetBy = Automatic
 

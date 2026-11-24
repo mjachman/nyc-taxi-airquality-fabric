@@ -35,16 +35,16 @@ table DimFX
 
 	column exchange_rate
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.0000
 		sourceProviderType: decimal(10, 4)
 		lineageTag: d1d19626-0f2f-4e9e-875e-89587f953a9d
 		sourceLineageTag: exchange_rate
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: exchange_rate
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column is_carried_forward
 		dataType: boolean

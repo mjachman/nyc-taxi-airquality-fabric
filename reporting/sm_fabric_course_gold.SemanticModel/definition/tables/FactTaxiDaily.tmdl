@@ -59,29 +59,29 @@ table FactTaxiDaily
 
 	column total_distance
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00
 		sourceProviderType: decimal(14, 2)
 		lineageTag: 814c702c-15d1-4a18-82b2-01d3c9299933
 		sourceLineageTag: total_distance
 		summarizeBy: sum
 		sourceColumn: total_distance
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column avg_duration_min
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00
 		sourceProviderType: decimal(10, 2)
 		lineageTag: bec71fd4-aab9-46bb-8f07-f2a5e91e4f2a
 		sourceLineageTag: avg_duration_min
 		summarizeBy: sum
 		sourceColumn: avg_duration_min
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column total_fare_usd
 		dataType: decimal
@@ -111,12 +111,14 @@ table FactTaxiDaily
 
 	column total_amount_usd
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		sourceProviderType: decimal(14, 2)
 		lineageTag: e53a3688-44ec-485a-93cc-1b114e9d6dd5
 		sourceLineageTag: total_amount_usd
 		summarizeBy: sum
 		sourceColumn: total_amount_usd
+
+		changedProperty = FormatString
 
 		annotation SummarizationSetBy = Automatic
 
@@ -137,16 +139,16 @@ table FactTaxiDaily
 
 	column total_amount_eur
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
 		sourceProviderType: decimal(14, 2)
 		lineageTag: 81ada0cb-f4a9-47a4-b6aa-acb81271b8e4
 		sourceLineageTag: total_amount_eur
 		summarizeBy: sum
 		sourceColumn: total_amount_eur
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	partition FactTaxiDaily = entity
 		mode: directLake

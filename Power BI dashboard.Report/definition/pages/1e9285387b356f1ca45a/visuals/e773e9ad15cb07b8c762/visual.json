@@ -1,0 +1,100 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "e773e9ad15cb07b8c762",
+  "position": {
+    "x": 1046.7097949194665,
+    "y": 523.35489745973325,
+    "z": 3000,
+    "height": 557.15732958964918,
+    "width": 606.11257612263091,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimSensors"
+                    }
+                  },
+                  "Property": "station_name"
+                }
+              },
+              "queryRef": "DimSensors.station_name",
+              "nativeQueryRef": "station_name"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactAirQualityDaily"
+                        }
+                      },
+                      "Property": "avg_value"
+                    }
+                  },
+                  "Function": 1
+                }
+              },
+              "queryRef": "Avg(FactAirQualityDaily.avg_value)",
+              "nativeQueryRef": "Weighted Avg AQ",
+              "displayName": "Weighted Avg AQ"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactAirQualityDaily"
+                        }
+                      },
+                      "Property": "max_value"
+                    }
+                  },
+                  "Function": 4
+                }
+              },
+              "queryRef": "Avg(FactAirQualityDaily.max_value)",
+              "nativeQueryRef": "Peak Max AQ",
+              "displayName": "Peak Max AQ"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "FactAirQualityDaily"
+                      }
+                    },
+                    "Property": "max_value"
+                  }
+                },
+                "Function": 4
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

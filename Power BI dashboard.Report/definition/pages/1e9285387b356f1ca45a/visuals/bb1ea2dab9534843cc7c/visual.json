@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "bb1ea2dab9534843cc7c",
+  "position": {
+    "x": 731.06495797841058,
+    "y": 0,
+    "z": 7000,
+    "height": 131.71292519587942,
+    "width": 157.35614957029841,
+    "tabOrder": 7000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "DimSensors"
+                        }
+                      },
+                      "Property": "units"
+                    }
+                  },
+                  "Function": 3
+                }
+              },
+              "queryRef": "Min(DimSensors.units)",
+              "nativeQueryRef": "unit",
+              "displayName": "unit"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

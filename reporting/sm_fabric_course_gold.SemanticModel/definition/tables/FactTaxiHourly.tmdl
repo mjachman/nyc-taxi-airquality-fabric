@@ -1,0 +1,96 @@
+table FactTaxiHourly
+	lineageTag: cc4494b0-525a-4709-994b-498776d4f848
+	sourceLineageTag: [dbo].[FactTaxiHourly]
+
+	column date_key
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: date
+		lineageTag: f1b9f9d6-a8c3-46d2-9bc4-7f629c1ce48e
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour_key
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: e7dcf09b-5ae7-4422-9ced-d19bd116c36f
+		sourceLineageTag: hour_key
+		summarizeBy: none
+		sourceColumn: hour_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column location_id
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 042edf8b-31a1-4cbe-b8f1-f54c4c9b0a6f
+		sourceLineageTag: location_id
+		summarizeBy: none
+		sourceColumn: location_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 293bf9b4-1008-41ac-81ce-648bf2cb20aa
+		sourceLineageTag: trip_count
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_duration_min
+		dataType: decimal
+		formatString: #,0.00
+		sourceProviderType: decimal(10, 2)
+		lineageTag: 28b63b05-98c9-44a3-8fc2-d049269e79b9
+		sourceLineageTag: avg_duration_min
+		summarizeBy: sum
+		sourceColumn: avg_duration_min
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_amount_usd
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(14, 2)
+		lineageTag: 11e53d55-2bc6-4d0d-a8a5-2976f8bdb5b5
+		sourceLineageTag: total_amount_usd
+		summarizeBy: sum
+		sourceColumn: total_amount_usd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column total_amount_eur
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		sourceProviderType: decimal(14, 2)
+		lineageTag: 6ab52f88-eb68-4b49-8943-dbd183cdaa3b
+		sourceLineageTag: total_amount_eur
+		summarizeBy: sum
+		sourceColumn: total_amount_eur
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	partition FactTaxiHourly = entity
+		mode: directLake
+		source
+			entityName: FactTaxiHourly
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,37 @@
+table DimHour
+	lineageTag: 7c4a787a-0cef-4174-aa2e-a3effc5f2f33
+	sourceLineageTag: [dbo].[DimHour]
+
+	column hour_key
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: ee9cd5fb-ab9f-46a5-b99d-482394fa2127
+		sourceLineageTag: hour_key
+		summarizeBy: none
+		sourceColumn: hour_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour_label
+		dataType: string
+		sourceProviderType: char
+		lineageTag: 92a69ff5-a7f1-4232-b5f1-8de87d63193d
+		sourceLineageTag: hour_label
+		summarizeBy: none
+		sourceColumn: hour_label
+		sortByColumn: hour_key
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimHour = entity
+		mode: directLake
+		source
+			entityName: DimHour
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

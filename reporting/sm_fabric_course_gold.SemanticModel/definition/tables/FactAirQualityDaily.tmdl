@@ -1,12 +1,58 @@
 table FactAirQualityDaily
-	lineageTag: ae83f3fa-c867-4725-b6bd-ed9acb2c9f07
+	lineageTag: 767fc310-44e4-4dd9-88eb-d5ebe1fe0102
 	sourceLineageTag: [dbo].[FactAirQualityDaily]
+
+	measure 'Weighted Avg AQ' =
+			
+			IF(
+			    DISTINCTCOUNT(DimSensors[parameter]) = 1 && DISTINCTCOUNT(DimSensors[units]) = 1,
+			    DIVIDE(SUMX(FactAirQualityDaily, FactAirQualityDaily[avg_value] * FactAirQualityDaily[observed_count]), SUM(FactAirQualityDaily[observed_count]))
+			)
+		formatString: #,0.00
+		lineageTag: f115050c-c1a4-4b31-9a83-0da0b7d4eebc
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+	measure 'Peak Max AQ' =
+			
+			IF(
+			    DISTINCTCOUNT(DimSensors[parameter]) = 1 && DISTINCTCOUNT(DimSensors[units]) = 1,
+			    MAX(FactAirQualityDaily[max_value])
+			)
+		formatString: #,0.00
+		lineageTag: ad99be9b-410b-40cb-9c33-403087c0f674
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+	measure 'Avg Coverage %' = DIVIDE(AVERAGE(FactAirQualityDaily[percent_coverage]), 100)
+		formatString: #,0.00%;-#,0.00%;#,0.00%
+		lineageTag: f205cd11-e3f6-4f11-b5fe-3b7a48d02d1f
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+	measure 'Weekday vs Weekend AQ %' =
+			
+			VAR WeekdayAQ = CALCULATE([Weighted Avg AQ], DimDate[is_weekend] = FALSE())
+			VAR WeekendAQ = CALCULATE([Weighted Avg AQ], DimDate[is_weekend] = TRUE())
+			RETURN
+			DIVIDE(WeekdayAQ - WeekendAQ, WeekendAQ)
+		lineageTag: 1ab1ec08-ab96-4889-b141-8de70181e2c6
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column date
 		dataType: dateTime
 		formatString: General Date
 		sourceProviderType: date
-		lineageTag: 8ad1dd9b-aa81-4b30-8979-965ec5204336
+		lineageTag: 1f0407df-fee8-47e1-b49b-0eedc705abb9
 		sourceLineageTag: date
 		summarizeBy: none
 		sourceColumn: date
@@ -17,7 +63,7 @@ table FactAirQualityDaily
 		dataType: int64
 		formatString: 0
 		sourceProviderType: bigint
-		lineageTag: c7382177-0dce-49c8-b60b-8d996f2e001b
+		lineageTag: 34b47624-13e1-4ea6-aa51-c2009e5ae2be
 		sourceLineageTag: sensor_id
 		summarizeBy: none
 		sourceColumn: sensor_id
@@ -26,61 +72,61 @@ table FactAirQualityDaily
 
 	column avg_value
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00
 		sourceProviderType: decimal(12, 4)
-		lineageTag: b86f62f3-205e-4891-abf8-70835ba7631f
+		lineageTag: 9ea93743-3cf4-4831-bc69-9725afd0b74e
 		sourceLineageTag: avg_value
 		summarizeBy: sum
 		sourceColumn: avg_value
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column min_value
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00
 		sourceProviderType: decimal(12, 4)
-		lineageTag: 41233826-b4da-42a2-9e63-b89ca5bd43d3
+		lineageTag: 8e8eeded-92c8-4931-9248-00092b5a006a
 		sourceLineageTag: min_value
 		summarizeBy: sum
 		sourceColumn: min_value
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column max_value
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00
 		sourceProviderType: decimal(12, 4)
-		lineageTag: ddd30da4-919e-4cef-8830-3a566bb73980
+		lineageTag: b198168b-b523-47b6-af06-d9c7744eccb3
 		sourceLineageTag: max_value
 		summarizeBy: sum
 		sourceColumn: max_value
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column median_value
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00
 		sourceProviderType: decimal(12, 4)
-		lineageTag: 38ebf9ee-81dc-4539-b822-14d51110314d
+		lineageTag: 9d11eb26-7603-439e-8772-e9015b40843c
 		sourceLineageTag: median_value
 		summarizeBy: sum
 		sourceColumn: median_value
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column observed_count
 		dataType: int64
 		formatString: 0
 		sourceProviderType: int
-		lineageTag: 16f9d3d9-912d-469a-9431-94c832d7c3c5
+		lineageTag: 6e78811f-5e18-4ae1-9c84-5817c07cdf2e
 		sourceLineageTag: observed_count
 		summarizeBy: sum
 		sourceColumn: observed_count
@@ -89,16 +135,16 @@ table FactAirQualityDaily
 
 	column percent_coverage
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00%;-#,0.00%;#,0.00%
 		sourceProviderType: decimal(5, 2)
-		lineageTag: e4ab017e-30a1-4128-9b38-3473920fc025
+		lineageTag: c4c75639-67f6-4561-a062-eb229e7ce68d
 		sourceLineageTag: percent_coverage
 		summarizeBy: sum
 		sourceColumn: percent_coverage
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	partition FactAirQualityDaily = entity
 		mode: directLake

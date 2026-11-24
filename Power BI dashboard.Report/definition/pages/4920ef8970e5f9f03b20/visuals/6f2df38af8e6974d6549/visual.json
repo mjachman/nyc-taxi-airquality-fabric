@@ -1,0 +1,62 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "6f2df38af8e6974d6549",
+  "position": {
+    "x": 1097.297053745898,
+    "y": 677.796856058135,
+    "z": 7000,
+    "height": 403.29798334313523,
+    "width": 752.97831572157611,
+    "tabOrder": 7000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimHour"
+                    }
+                  },
+                  "Property": "hour_label"
+                }
+              },
+              "queryRef": "DimHour.hour_label",
+              "nativeQueryRef": "hour_label",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactTaxiHourly"
+                        }
+                      },
+                      "Property": "trip_count"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(FactTaxiHourly.trip_count)",
+              "nativeQueryRef": "Sum of trip_count"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

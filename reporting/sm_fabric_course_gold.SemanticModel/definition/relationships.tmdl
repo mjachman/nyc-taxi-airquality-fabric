@@ -2,23 +2,37 @@ relationship d01a90fd-8348-3afe-c31c-b94013fefa79
 	fromColumn: FactTaxiDaily.date_key
 	toColumn: DimDate.date_key
 
-relationship 3a9913a0-3ff5-ca0a-40c3-6138fd532b1b
-	fromColumn: FactAirQualityDaily.date
-	toColumn: DimDate.date_key
-
 relationship f6ef9535-6dea-354c-ec8e-9ac5888582e9
 	fromColumn: FactTaxiDaily.location_id
 	toColumn: DimZone.location_id
-
-relationship 090953af-987f-e6d9-9e7f-7526a21d5f6d
-	fromColumn: FactAirQualityDaily.sensor_id
-	toColumn: DimSensors.sensor_id
 
 relationship 2cbcb618-f46b-05bd-c59d-f2d4a646741f
 	fromColumn: FactTaxiDaily.year
 	toColumn: DimGDP.year
 
-relationship 329ccfef-5edf-b819-1be5-1a32e5472af3
-	fromColumn: FactTaxiDaily.date_key
+relationship 10fe6b32-3b09-fa28-1713-c7879cfbb4a2
+	fromColumn: FactTaxiHourly.date_key
+	toColumn: DimDate.date_key
+
+relationship e612803b-2544-194d-e9ec-cacf7279139d
+	fromColumn: FactTaxiHourly.hour_key
+	toColumn: DimHour.hour_key
+
+relationship b83fe781-f4e9-cbf3-1495-eece04771cbf
+	fromColumn: FactTaxiHourly.location_id
+	toColumn: DimZone.location_id
+
+relationship 423808a0-b3a1-1a2c-16c1-df7b8b7e5f82
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: DimDate.date_key
 	toColumn: DimFX.rate_date
+
+relationship ee0f4023-cd1a-6af1-50fc-418c5670eac6
+	fromColumn: FactAirQualityDaily.date
+	toColumn: DimDate.date_key
+
+relationship 735bed4e-82f4-4cc5-0ab7-b7281c091d36
+	fromColumn: FactAirQualityDaily.sensor_id
+	toColumn: DimSensors.sensor_id
 

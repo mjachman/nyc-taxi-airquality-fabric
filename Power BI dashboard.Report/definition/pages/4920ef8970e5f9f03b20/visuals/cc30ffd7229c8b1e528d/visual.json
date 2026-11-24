@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "cc30ffd7229c8b1e528d",
   "position": {
-    "x": 1282.4787492101025,
-    "y": 35.067778298713741,
-    "z": 2002,
-    "height": 141.52353384838045,
-    "width": 275.53254377560796,
-    "tabOrder": 2002
+    "x": 1197.0723378421962,
+    "y": 34.9680332378441,
+    "z": 3000,
+    "height": 148.03134070687332,
+    "width": 216.80180607463339,
+    "tabOrder": 3000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -39,28 +39,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "363692b0bb68ef807dd2",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "FactTaxiDaily"
-                  }
-                },
-                "Property": "total_amount_eur"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

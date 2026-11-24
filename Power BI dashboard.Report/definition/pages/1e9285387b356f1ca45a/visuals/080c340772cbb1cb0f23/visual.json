@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "080c340772cbb1cb0f23",
+  "position": {
+    "x": 428.00866991709518,
+    "y": 0,
+    "z": 5000,
+    "height": 131.71292519587942,
+    "width": 151.52814403065773,
+    "tabOrder": 5000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactAirQualityDaily"
+                    }
+                  },
+                  "Property": "Peak Max AQ"
+                }
+              },
+              "queryRef": "FactAirQualityDaily.Peak Max AQ",
+              "nativeQueryRef": "Peak Max AQ"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -45,15 +45,18 @@ table DimGDP
 
 	column gdp_usd
 		dataType: double
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		sourceProviderType: decimal(18, 2)
 		lineageTag: b712a6b9-9751-49a8-987c-7cb1da2db76b
 		sourceLineageTag: gdp_usd
 		summarizeBy: none
 		sourceColumn: gdp_usd
 
+		changedProperty = FormatString
+
 		annotation SummarizationSetBy = Automatic
 
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
 	partition DimGDP = entity
 		mode: directLake

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "9ff4cee5c27ac0c3540c",
+  "position": {
+    "x": 498.74506362439666,
+    "y": 196.0668554788783,
+    "z": 2000,
+    "height": 149.50097730264471,
+    "width": 225.47688380071006,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
+                    }
+                  },
+                  "Property": "Avg Revenue per Trip EUR"
+                }
+              },
+              "queryRef": "FactTaxiDaily.Avg Revenue per Trip EUR",
+              "nativeQueryRef": "Avg Revenue per Trip EUR"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "b13c9df5bde01fd6d548",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FactTaxiDaily"
+              }
+            },
+            "Property": "Avg Revenue per Trip EUR"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

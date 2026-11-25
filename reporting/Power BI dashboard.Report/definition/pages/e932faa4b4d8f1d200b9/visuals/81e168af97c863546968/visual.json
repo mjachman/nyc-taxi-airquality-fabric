@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "81e168af97c863546968",
+  "position": {
+    "x": 22.993796839475678,
+    "y": 196.59696297751705,
+    "z": 1000,
+    "height": 150.6093692985657,
+    "width": 234.53672776265194,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "FactTaxiDaily"
+                        }
+                      },
+                      "Property": "total_amount_usd"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(FactTaxiDaily.total_amount_usd)",
+              "nativeQueryRef": "Sum of total_amount_usd"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

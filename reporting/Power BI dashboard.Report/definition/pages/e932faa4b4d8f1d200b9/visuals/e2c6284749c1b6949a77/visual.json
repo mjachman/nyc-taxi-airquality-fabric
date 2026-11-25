@@ -1,0 +1,56 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "e2c6284749c1b6949a77",
+  "position": {
+    "x": 724.22194742510669,
+    "y": 197.2922733256213,
+    "z": 3000,
+    "height": 150.72639514938768,
+    "width": 138.4722166819578,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimFX"
+                    }
+                  },
+                  "Property": "Avg FX Rate"
+                }
+              },
+              "queryRef": "DimFX.Avg FX Rate",
+              "nativeQueryRef": "Avg FX Rate"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "3ce5ce048ae5e89b5050",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "DimFX"
+              }
+            },
+            "Property": "Avg FX Rate"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

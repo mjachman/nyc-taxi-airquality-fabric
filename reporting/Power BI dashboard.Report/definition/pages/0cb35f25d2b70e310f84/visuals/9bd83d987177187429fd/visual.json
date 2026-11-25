@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "9bd83d987177187429fd",
+  "position": {
+    "x": 245.94183377283679,
+    "y": 114.22890857695738,
+    "z": 5000,
+    "height": 137.54093073552011,
+    "width": 182.99937394471743,
+    "tabOrder": 5000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactAirQualityDaily"
+                    }
+                  },
+                  "Property": "Weighted Avg AQ"
+                }
+              },
+              "queryRef": "FactAirQualityDaily.Weighted Avg AQ",
+              "nativeQueryRef": "Weighted Avg AQ"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

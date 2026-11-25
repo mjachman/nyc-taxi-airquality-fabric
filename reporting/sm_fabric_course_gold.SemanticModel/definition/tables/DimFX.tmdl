@@ -2,6 +2,14 @@ table DimFX
 	lineageTag: 74630735-3f90-4227-8b8d-c9225fd2d7fb
 	sourceLineageTag: [dbo].[DimFX]
 
+	measure 'Avg FX Rate' = AVERAGE(DimFX[exchange_rate])
+		formatString: #,0.0000
+		lineageTag: a705de82-6bd9-4ded-9495-8a87031b2b2e
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
 	column rate_date
 		dataType: dateTime
 		formatString: General Date

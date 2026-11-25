@@ -2,6 +2,24 @@ table FactTaxiDaily
 	lineageTag: 7aca4090-ffc8-4d06-81bd-f44623e48385
 	sourceLineageTag: [dbo].[FactTaxiDaily]
 
+	measure 'Avg Revenue per Trip USD' = DIVIDE(SUM(FactTaxiDaily[total_amount_usd]), SUM(FactTaxiDaily[trip_count]))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 57362a8b-200a-4968-8acc-8b497e3caa48
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Avg Revenue per Trip EUR' = DIVIDE(SUM(FactTaxiDaily[total_amount_eur]), SUM(FactTaxiDaily[trip_count]))
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		lineageTag: 18a8571b-1cbc-4668-ae7a-656a26ab2607
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
 	column date_key
 		dataType: dateTime
 		formatString: General Date
@@ -37,12 +55,14 @@ table FactTaxiDaily
 
 	column trip_count
 		dataType: int64
-		formatString: 0
+		formatString: #,0
 		sourceProviderType: int
 		lineageTag: f453aebb-af18-4235-883e-555432d8975f
 		sourceLineageTag: trip_count
 		summarizeBy: sum
 		sourceColumn: trip_count
+
+		changedProperty = FormatString
 
 		annotation SummarizationSetBy = Automatic
 

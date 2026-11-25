@@ -42,11 +42,12 @@ table FactAirQualityDaily
 			VAR WeekendAQ = CALCULATE([Weighted Avg AQ], DimDate[is_weekend] = TRUE())
 			RETURN
 			DIVIDE(WeekdayAQ - WeekendAQ, WeekendAQ)
+		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 1ab1ec08-ab96-4889-b141-8de70181e2c6
 
 		changedProperty = Name
 
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
+		changedProperty = FormatString
 
 	column date
 		dataType: dateTime

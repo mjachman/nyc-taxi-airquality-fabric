@@ -3,7 +3,7 @@
   "name": "ba0a98624b6ea37b4ff5",
   "position": {
     "x": 0,
-    "y": 196.98658723985506,
+    "y": 256.43224374419003,
     "z": 1000,
     "height": 361.33634345772231,
     "width": 1514.1158391986492,
@@ -91,70 +91,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "38253d2c34e29491fe9b",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "FactAirQualityDaily"
-              }
-            },
-            "Property": "Weighted Avg AQ"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "5e27b8173c1e90bb82f6",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimDate"
-              }
-            },
-            "Property": "year"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "e4f6ba568b58cea76ef8",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimDate"
-              }
-            },
-            "Property": "month"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "76fed73cfdaec43f5701",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "FactTaxiDaily"
-                  }
-                },
-                "Property": "trip_count"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

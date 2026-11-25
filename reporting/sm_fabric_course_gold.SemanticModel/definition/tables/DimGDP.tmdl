@@ -2,6 +2,21 @@ table DimGDP
 	lineageTag: f452e2c2-e607-499f-b15c-62d72f8a32d6
 	sourceLineageTag: [dbo].[DimGDP]
 
+	measure 'US GDP (USD)' =
+			
+			IF(
+			    DISTINCTCOUNT(DimDate[year]) = 1,
+			    CALCULATE(MAX(DimGDP[gdp_usd])/1000000000000, CROSSFILTER(FactTaxiDaily[year], DimGDP[year], BOTH))
+			)
+		formatString: $#,##0.0000 "T"
+		lineageTag: 8e988187-e0c7-4910-8115-ab34c36c5918
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
 	column year
 		dataType: int64
 		formatString: 0

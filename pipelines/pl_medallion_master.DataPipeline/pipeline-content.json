@@ -138,7 +138,7 @@
         "name": "nb_silver_transform_zones",
         "dependsOn": [
           {
-            "activity": "If Condition1",
+            "activity": "Check Taxi Ingest Flag",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -339,6 +339,7 @@
         "type": "IfCondition",
         "typeProperties": {
           "expression": {
+            "value": "@pipeline().parameters.ingest_taxi_parquets",
             "type": "Expression"
           },
           "ifTrueActivities": [
@@ -368,12 +369,42 @@
           ],
           "ifFalseActivities": []
         },
-        "name": "If Condition1",
+        "name": "Check Taxi Ingest Flag",
         "state": "Inactive",
         "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "df_openaq",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "PBISemanticModelRefresh",
+        "typeProperties": {
+          "method": "POST",
+          "groupId": "00000000-0000-0000-0000-000000000000",
+          "datasetId": "315905d0-853a-bd45-4052-7cc1de98c8c6",
+          "commitMode": "Transactional",
+          "waitOnCompletion": true,
+          "operationType": "SemanticModelRefresh"
+        },
+        "externalReferences": {
+          "connection": "fe53c300-794b-4cf8-845f-b1e7bfe6a2fd"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Semantic model refresh",
+        "dependsOn": [
+          {
+            "activity": "gold_facts",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -397,7 +428,7 @@
         "type": "string",
         "defaultValue": "2025-12-31"
       },
-      "ingest_taxi_parquet": {
+      "ingest_taxi_parquets": {
         "type": "bool",
         "defaultValue": false
       }

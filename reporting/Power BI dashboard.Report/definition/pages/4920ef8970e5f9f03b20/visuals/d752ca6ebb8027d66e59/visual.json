@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "d752ca6ebb8027d66e59",
   "position": {
-    "x": 10.490409971353229,
+    "x": 10.347208577764055,
     "y": 0,
     "z": 0,
-    "height": 62.942459828119368,
-    "width": 752.97831572157611,
+    "height": 96.573946725797853,
+    "width": 753.04684649282854,
     "tabOrder": 0
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "NYC YELLOW TAXI ECONOMICS",
+                    "value": "NYC YELLOW TAXI MOBILITY",
                     "textStyle": {
                       "fontWeight": "bold",
                       "fontSize": "32pt"

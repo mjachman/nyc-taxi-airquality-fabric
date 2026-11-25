@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "f251a392567cdacef04f",
   "position": {
-    "x": 579.53681394775288,
-    "y": 0,
+    "x": 734.19190501585831,
+    "y": 154.28832065568255,
     "z": 6000,
     "height": 131.71292519587942,
     "width": 151.52814403065773,
@@ -34,5 +34,23 @@
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "29d7b84691168c2c58d9",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FactAirQualityDaily"
+              }
+            },
+            "Property": "Avg Coverage %"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

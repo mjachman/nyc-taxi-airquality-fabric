@@ -34,23 +34,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "b13c9df5bde01fd6d548",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "FactTaxiDaily"
-              }
-            },
-            "Property": "Avg Revenue per Trip EUR"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

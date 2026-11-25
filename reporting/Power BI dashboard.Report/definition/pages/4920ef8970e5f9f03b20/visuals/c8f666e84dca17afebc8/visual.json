@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "c8f666e84dca17afebc8",
   "position": {
-    "x": 1411.5429417009732,
-    "y": 34.9680332378441,
-    "z": 5000,
-    "height": 148.03134070687332,
-    "width": 213.30500275084898,
-    "tabOrder": 5000
+    "x": 922.0512532629748,
+    "y": 48.286973362898927,
+    "z": 3000,
+    "height": 162.10626771830354,
+    "width": 151.75905914053948,
+    "tabOrder": 3000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -32,12 +32,36 @@
                 }
               },
               "queryRef": "Sum(FactTaxiDaily.total_passengers)",
-              "nativeQueryRef": "Sum of total_passengers"
+              "nativeQueryRef": "Total Passengers",
+              "displayName": "Total Passengers"
             }
           ]
         }
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "0abe67f5dee691b55840",
+        "field": {
+          "Aggregation": {
+            "Expression": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "FactTaxiDaily"
+                  }
+                },
+                "Property": "total_passengers"
+              }
+            },
+            "Function": 0
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

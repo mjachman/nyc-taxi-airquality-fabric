@@ -1,0 +1,57 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "6740ae24e42d1018ac9c",
+  "position": {
+    "x": 1268.1078956970837,
+    "y": 48.286973362898927,
+    "z": 9000,
+    "height": 163.25595756027732,
+    "width": 186.24975439975302,
+    "tabOrder": 9000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
+                    }
+                  },
+                  "Property": "Avg Trip Distance (mi)"
+                }
+              },
+              "queryRef": "FactTaxiDaily.Avg Trip Distance (mi)",
+              "nativeQueryRef": "Avg Trip Distance (mi)",
+              "displayName": "Avg Trip Distance (mi)"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "cd4e409fcacfb00fb75f",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FactTaxiDaily"
+              }
+            },
+            "Property": "Avg Trip Distance (mi)"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

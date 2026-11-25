@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "6f2df38af8e6974d6549",
   "position": {
-    "x": 1097.297053745898,
-    "y": 677.796856058135,
-    "z": 7000,
-    "height": 403.29798334313523,
-    "width": 752.97831572157611,
-    "tabOrder": 7000
+    "x": 948.49411962837178,
+    "y": 678.31700676453261,
+    "z": 5000,
+    "height": 402.39144469082441,
+    "width": 971.48791646784741,
+    "tabOrder": 5000
   },
   "visual": {
     "visualType": "clusteredColumnChart",
@@ -51,12 +51,104 @@
                 }
               },
               "queryRef": "Sum(FactTaxiHourly.trip_count)",
-              "nativeQueryRef": "Sum of trip_count"
+              "nativeQueryRef": "Hourly Trip Volume",
+              "displayName": "Hourly Trip Volume"
             }
           ]
         }
       }
     },
+    "visualContainerObjects": {
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualTooltip": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Hourly Trip Volume'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "7e03fb685e035e61065e",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "DimHour"
+              }
+            },
+            "Property": "hour_label"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "f1bef2b838efda57bac7",
+        "field": {
+          "Aggregation": {
+            "Expression": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "FactTaxiHourly"
+                  }
+                },
+                "Property": "trip_count"
+              }
+            },
+            "Function": 0
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

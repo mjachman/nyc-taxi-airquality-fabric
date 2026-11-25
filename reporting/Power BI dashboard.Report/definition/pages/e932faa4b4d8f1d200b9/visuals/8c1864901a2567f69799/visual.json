@@ -23,26 +23,11 @@
                       "Entity": "DimDate"
                     }
                   },
-                  "Property": "year"
+                  "Property": "date_key"
                 }
               },
-              "queryRef": "DimDate.year",
-              "nativeQueryRef": "year",
-              "active": true
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "DimDate"
-                    }
-                  },
-                  "Property": "month"
-                }
-              },
-              "queryRef": "DimDate.month",
-              "nativeQueryRef": "month",
+              "queryRef": "DimDate.date_key",
+              "nativeQueryRef": "date_key",
               "active": true
             }
           ]
@@ -79,68 +64,82 @@
             }
           ]
         }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "DimDate"
+                  }
+                },
+                "Property": "date_key"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
       }
     },
+    "objects": {
+      "zoom": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "valueMax": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            },
+            "valueSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "15.519214928999865D"
+                }
+              }
+            },
+            "categoryMax": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            },
+            "categorySize": {
+              "expr": {
+                "Literal": {
+                  "Value": "90710070570.28442D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "lineStyles": [
+        {
+          "properties": {
+            "strokeWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "8e1dc16b550912f1ec19",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimDate"
-              }
-            },
-            "Property": "year"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "5b04b0bda54d3eb72c78",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimDate"
-              }
-            },
-            "Property": "month"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "9cae669d9175c0094811",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "FactTaxiDaily"
-              }
-            },
-            "Property": "Avg Revenue per Trip USD"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "955cdb4810330c6e579f",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "FactTaxiDaily"
-              }
-            },
-            "Property": "Avg Revenue per Trip EUR"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
+  "name": "0dbfa675c6b7c3240dfa",
+  "position": {
+    "x": 1454.3576500968368,
+    "y": 48.286973362898927,
+    "z": 9001,
+    "height": 163.25595756027732,
+    "width": 152.90874898251326,
+    "tabOrder": 9001
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
+                    }
+                  },
+                  "Property": "Trips per Day"
+                }
+              },
+              "queryRef": "FactTaxiDaily.Trips per Day",
+              "nativeQueryRef": "Avg Daily Trips",
+              "displayName": "Avg Daily Trips"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "d88a430561ca28dfc4ae",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FactTaxiDaily"
+              }
+            },
+            "Property": "Trips per Day"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

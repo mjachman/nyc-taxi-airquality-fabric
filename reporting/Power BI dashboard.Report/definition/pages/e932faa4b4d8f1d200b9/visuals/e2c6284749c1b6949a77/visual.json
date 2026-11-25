@@ -34,23 +34,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "3ce5ce048ae5e89b5050",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimFX"
-              }
-            },
-            "Property": "Avg FX Rate"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

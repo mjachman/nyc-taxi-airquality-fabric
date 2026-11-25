@@ -4,5 +4,10 @@
   "displayName": "Economic impact",
   "displayOption": "FitToPage",
   "height": 1080,
-  "width": 1920
+  "width": 1920,
+  "pageBinding": {
+    "name": "d5f11596aef6e6a8bc39",
+    "type": "Default",
+    "parameters": []
+  }
 }

@@ -9,6 +9,15 @@
         "page": "2.3.1"
       },
       "type": "SharedResources"
+    },
+    "customTheme": {
+      "name": "University_of_Melbourne5734977773616354.json",
+      "reportVersionAtImport": {
+        "visual": "2.15.0",
+        "report": "3.4.0",
+        "page": "2.3.1"
+      },
+      "type": "RegisteredResources"
     }
   },
   "filterConfig": {
@@ -112,6 +121,17 @@
     ]
   },
   "resourcePackages": [
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "University_of_Melbourne5734977773616354.json",
+          "path": "University_of_Melbourne5734977773616354.json",
+          "type": "CustomTheme"
+        }
+      ]
+    },
     {
       "name": "SharedResources",
       "type": "SharedResources",

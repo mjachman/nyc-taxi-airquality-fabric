@@ -20,6 +20,22 @@ table FactTaxiDaily
 
 		changedProperty = FormatString
 
+	measure 'Avg Trip Distance (mi)' = DIVIDE(SUM('FactTaxiDaily'[total_distance]), SUM('FactTaxiDaily'[trip_count]))
+		formatString: #,0.00
+		lineageTag: 28e9fd50-9f26-40a6-b189-03853a9dac40
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
+	measure 'Trips per Day' = DIVIDE(SUM('FactTaxiDaily'[trip_count]), DISTINCTCOUNT('FactTaxiDaily'[date_key]))
+		formatString: 0.00
+		lineageTag: 3ce4ce5e-2711-411e-a681-523bbc018873
+
+		changedProperty = Name
+
+		changedProperty = FormatString
+
 	column date_key
 		dataType: dateTime
 		formatString: General Date

@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "bb1ea2dab9534843cc7c",
   "position": {
-    "x": 731.06495797841058,
-    "y": 0,
+    "x": 576.68439666545021,
+    "y": 153.13863081370877,
     "z": 7000,
     "height": 131.71292519587942,
     "width": 157.35614957029841,
@@ -55,5 +55,28 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "dc0166d00fa394178811",
+        "field": {
+          "Aggregation": {
+            "Expression": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "DimSensors"
+                  }
+                },
+                "Property": "units"
+              }
+            },
+            "Function": 3
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

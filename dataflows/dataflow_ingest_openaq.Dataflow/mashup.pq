@@ -4,7 +4,7 @@ section Section1;
 shared bronze_openaq_locations = let
   BaseUrl = "https://api.openaq.org/v3",
   ApiKey = OpenAQApiKey,
-  Source = try 
+  Source = if Text.Trim(ApiKey) = "" then [results = {}] else try 
   Json.Document(Web.Contents(BaseUrl, [RelativePath = "locations", Query = [bbox = "-74.2557,40.4961,-73.7004,40.9153", limit = "100"], Headers = [#"X-API-Key" = ApiKey]]))
   otherwise [results = {}],
   Navigation = Source[results],
@@ -69,7 +69,7 @@ let
         Headers = [#"X-API-Key" = ApiKey]
       ]
     in
-      Function.InvokeAfter(() => try Json.Document(Web.Contents(BaseUrl, Options))[results] otherwise {}, #duration(0, 0, 0, 1.1)),
+      if Text.Trim(ApiKey) = "" then {} else Function.InvokeAfter(() => try Json.Document(Web.Contents(BaseUrl, Options))[results] otherwise {}, #duration(0, 0, 0, 1.1)),
   Page1 = FetchPage(1),
   Page2 = if List.Count(Page1) = 1000 then FetchPage(2) else {}
 in

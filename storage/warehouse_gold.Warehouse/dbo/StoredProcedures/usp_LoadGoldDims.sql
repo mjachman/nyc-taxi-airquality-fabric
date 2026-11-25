@@ -3,18 +3,34 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @min_taxi_date DATE = (
+        SELECT MIN(pickup_date)
+        FROM lakehouse_silver.dbo.silver_taxi_trips
+    );
+    DECLARE @min_aq_date DATE = (
+        SELECT MIN(measurement_date)
+        FROM lakehouse_silver.dbo.silver_openaq_measurements
+    );
+    IF @min_taxi_date IS NULL OR @min_aq_date IS NULL
+    BEGIN
+        THROW 50001, 'Silver date tables cannot be empty.', 1;
+    END;
+
+    IF NOT EXISTS (SELECT 1 FROM lakehouse_silver.dbo.silver_ecb_fx)
+    BEGIN
+        THROW 50002, 'Silver FX table cannot be empty.', 1;
+    END;
+
+    DECLARE @min_date DATE = CASE
+        WHEN @min_taxi_date <= @min_aq_date THEN @min_taxi_date
+        ELSE @min_aq_date
+    END;
+    DECLARE @start_date DATE = DATEFROMPARTS(YEAR(@min_date), 1, 1);
+    DECLARE @end_date DATE = DATEFROMPARTS(YEAR(GETDATE()), 12, 31);
+
     DROP TABLE IF EXISTS dbo.FactAirQualityDaily;
     DROP TABLE IF EXISTS dbo.FactTaxiDaily;
     DROP TABLE IF EXISTS dbo.FactTaxiHourly;
-
-    DECLARE @min_taxi_date DATE = (SELECT MIN(pickup_date) FROM lakehouse_silver.dbo.silver_taxi_trips);
-    DECLARE @min_aq_date   DATE = (SELECT MIN(measurement_date) FROM lakehouse_silver.dbo.silver_openaq_measurements);
-    DECLARE @min_date      DATE = CASE
-                                      WHEN @min_taxi_date <= @min_aq_date THEN @min_taxi_date
-                                      ELSE @min_aq_date
-                                  END;
-    DECLARE @start_date    DATE = DATEFROMPARTS(YEAR(COALESCE(@min_date, GETDATE())), 1, 1);
-    DECLARE @end_date      DATE = DATEFROMPARTS(YEAR(GETDATE()), 12, 31);
 
     DROP TABLE IF EXISTS #dates;
     CREATE TABLE #dates AS
@@ -28,11 +44,12 @@ BEGIN
         YEAR(cal_date)                                   AS year,
         MONTH(cal_date)                                  AS month_num,
         CAST(DATENAME(MONTH, cal_date) AS VARCHAR(15))   AS month,
-        ((DATEPART(WEEKDAY, cal_date) + 5) % 7) + 1      AS weekday_num,
+        (DATEDIFF(DAY, '1900-01-01', cal_date) % 7) + 1  AS weekday_num,
         CAST(DATENAME(WEEKDAY, cal_date) AS VARCHAR(15)) AS weekday,
         CAST(
             CASE
-                WHEN DATENAME(WEEKDAY, cal_date) IN ('Saturday', 'Sunday') THEN 1
+                WHEN (DATEDIFF(DAY, '1900-01-01', cal_date) % 7) + 1 IN (6, 7)
+                THEN 1
                 ELSE 0
             END AS BIT
         )                                                AS is_weekend
@@ -41,7 +58,8 @@ BEGIN
     DROP TABLE IF EXISTS #dates;
 
     ALTER TABLE dbo.DimDate
-    ADD CONSTRAINT PK_DimDate PRIMARY KEY NONCLUSTERED (date_key) NOT ENFORCED;
+    ADD CONSTRAINT PK_DimDate
+        PRIMARY KEY NONCLUSTERED (date_key) NOT ENFORCED;
 
     DROP TABLE IF EXISTS dbo.DimZone;
     CREATE TABLE dbo.DimZone AS
@@ -53,7 +71,8 @@ BEGIN
     FROM lakehouse_silver.dbo.silver_taxi_zones;
 
     ALTER TABLE dbo.DimZone
-    ADD CONSTRAINT PK_DimZone PRIMARY KEY NONCLUSTERED (location_id) NOT ENFORCED;
+    ADD CONSTRAINT PK_DimZone
+        PRIMARY KEY NONCLUSTERED (location_id) NOT ENFORCED;
 
     DROP TABLE IF EXISTS dbo.DimGDP;
     CREATE TABLE dbo.DimGDP AS
@@ -70,51 +89,22 @@ BEGIN
 
     DROP TABLE IF EXISTS dbo.DimFX;
     CREATE TABLE dbo.DimFX AS
-    WITH seed_rate AS (
-        SELECT TOP 1
-            rate_date,
-            exchange_rate,
-            1 AS has_ecb_rate,
-            1 AS is_seed
-        FROM lakehouse_silver.dbo.silver_ecb_fx
-        WHERE rate_date < (SELECT MIN(date_key) FROM dbo.DimDate)
-        ORDER BY rate_date DESC
-    ),
-    fx_with_seed AS (
-        SELECT rate_date, exchange_rate, has_ecb_rate, is_seed FROM seed_rate
-        UNION ALL
-        SELECT
-            d.date_key AS rate_date,
-            fx.exchange_rate,
-            CASE WHEN fx.exchange_rate IS NOT NULL THEN 1 ELSE 0 END AS has_ecb_rate,
-            0 AS is_seed
-        FROM dbo.DimDate AS d
-        LEFT JOIN lakehouse_silver.dbo.silver_ecb_fx AS fx
-            ON d.date_key = fx.rate_date
-    ),
-    fx_filled AS (
-        SELECT
-            ISNULL(rate_date, '1900-01-01') AS rate_date,
-            CAST('USD' AS CHAR(3)) AS currency,
-            CAST('EUR' AS CHAR(3)) AS currency_denom,
-            CAST(
-                LAST_VALUE(exchange_rate) IGNORE NULLS OVER (
-                    ORDER BY rate_date
-                    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-                ) AS DECIMAL(10, 4)
-            ) AS exchange_rate,
-            CAST(CASE WHEN has_ecb_rate = 0 THEN 1 ELSE 0 END AS BIT) AS is_carried_forward,
-            is_seed
-        FROM fx_with_seed
-    )
     SELECT
-        rate_date,
-        currency,
-        currency_denom,
-        exchange_rate,
-        is_carried_forward
-    FROM fx_filled
-    WHERE is_seed = 0;
+        d.date_key                                   AS rate_date,
+        CAST('USD' AS CHAR(3))                       AS currency,
+        CAST('EUR' AS CHAR(3))                       AS currency_denom,
+        CAST(latest.exchange_rate AS DECIMAL(10, 4)) AS exchange_rate,
+        CAST(
+            CASE WHEN latest.rate_date = d.date_key THEN 0 ELSE 1 END
+            AS BIT
+        )                                            AS is_carried_forward
+    FROM dbo.DimDate AS d
+    OUTER APPLY (
+        SELECT TOP 1 fx.rate_date, fx.exchange_rate
+        FROM lakehouse_silver.dbo.silver_ecb_fx AS fx
+        WHERE fx.rate_date <= d.date_key
+        ORDER BY fx.rate_date DESC
+    ) AS latest;
 
     ALTER TABLE dbo.DimFX
     ADD CONSTRAINT PK_DimFX PRIMARY KEY NONCLUSTERED (rate_date) NOT ENFORCED;
@@ -133,17 +123,21 @@ BEGIN
     FROM lakehouse_silver.dbo.silver_openaq_locations;
 
     ALTER TABLE dbo.DimSensors
-    ADD CONSTRAINT PK_DimSensors PRIMARY KEY NONCLUSTERED (sensor_id) NOT ENFORCED;
+    ADD CONSTRAINT PK_DimSensors
+        PRIMARY KEY NONCLUSTERED (sensor_id) NOT ENFORCED;
 
     DROP TABLE IF EXISTS dbo.DimHour;
     CREATE TABLE dbo.DimHour AS
     SELECT
         ISNULL(CAST(value AS INT), 0) AS hour_key,
-        CAST(RIGHT('0' + CAST(value AS VARCHAR(2)), 2) + ':00' AS CHAR(5)) AS hour_label
+        CAST(
+            RIGHT('0' + CAST(value AS VARCHAR(2)), 2) + ':00' AS CHAR(5)
+        ) AS hour_label
     FROM GENERATE_SERIES(0, 23);
 
     ALTER TABLE dbo.DimHour
-    ADD CONSTRAINT PK_DimHour PRIMARY KEY NONCLUSTERED (hour_key) NOT ENFORCED;
+    ADD CONSTRAINT PK_DimHour
+        PRIMARY KEY NONCLUSTERED (hour_key) NOT ENFORCED;
 END;
 
 GO

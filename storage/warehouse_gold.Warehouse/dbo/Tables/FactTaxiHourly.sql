@@ -1,11 +1,12 @@
 CREATE TABLE [dbo].[FactTaxiHourly] (
-    [date_key]         DATE            NOT NULL,
-    [hour_key]         INT             NOT NULL,
-    [location_id]      INT             NOT NULL,
-    [trip_count]       INT             NULL,
-    [avg_duration_min] DECIMAL (10, 2) NULL,
-    [total_amount_usd] DECIMAL (14, 2) NULL,
-    [total_amount_eur] DECIMAL (14, 2) NULL
+    [date_key]           DATE            NOT NULL,
+    [hour_key]           INT             NOT NULL,
+    [location_id]        INT             NOT NULL,
+    [trip_count]         INT             NULL,
+    [total_duration_min] DECIMAL (14, 2) NULL,
+    [avg_duration_min]   DECIMAL (10, 2) NULL,
+    [total_amount_usd]   DECIMAL (14, 2) NULL,
+    [total_amount_eur]   DECIMAL (14, 2) NULL
 );
 
 

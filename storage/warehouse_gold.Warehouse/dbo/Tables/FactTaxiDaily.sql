@@ -1,16 +1,17 @@
 CREATE TABLE [dbo].[FactTaxiDaily] (
-    [date_key]         DATE            NOT NULL,
-    [location_id]      INT             NOT NULL,
-    [year]             INT             NOT NULL,
-    [trip_count]       INT             NULL,
-    [total_passengers] INT             NULL,
-    [total_distance]   DECIMAL (14, 2) NULL,
-    [avg_duration_min] DECIMAL (10, 2) NULL,
-    [total_fare_usd]   DECIMAL (14, 2) NULL,
-    [total_tip_usd]    DECIMAL (14, 2) NULL,
-    [total_amount_usd] DECIMAL (14, 2) NULL,
-    [total_fare_eur]   DECIMAL (14, 2) NULL,
-    [total_amount_eur] DECIMAL (14, 2) NULL
+    [date_key]           DATE            NOT NULL,
+    [location_id]        INT             NOT NULL,
+    [year]               INT             NOT NULL,
+    [trip_count]         INT             NULL,
+    [total_passengers]   INT             NULL,
+    [total_distance]     DECIMAL (14, 2) NULL,
+    [total_duration_min] DECIMAL (14, 2) NULL,
+    [avg_duration_min]   DECIMAL (10, 2) NULL,
+    [total_fare_usd]     DECIMAL (14, 2) NULL,
+    [total_tip_usd]      DECIMAL (14, 2) NULL,
+    [total_amount_usd]   DECIMAL (14, 2) NULL,
+    [total_fare_eur]     DECIMAL (14, 2) NULL,
+    [total_amount_eur]   DECIMAL (14, 2) NULL
 );
 
 

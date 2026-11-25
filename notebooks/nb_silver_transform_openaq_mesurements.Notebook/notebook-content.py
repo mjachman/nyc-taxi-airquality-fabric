@@ -25,63 +25,72 @@
 
 # MARKDOWN ********************
 
+# # Silver Transform: OpenAQ Measurements
+
+# MARKDOWN ********************
+
 # ## [0] PROFILE
 
 # CELL ********************
 
-from pyspark.sql import functions as F
 import re
+
+from pyspark.sql import functions as F
+
 BRONZE_MEASUREMENTS_TABLE = "lakehouse_bronze.dbo.bronze_openaq_measurements"
-SILVER_MEASUREMENTS_TABLE = "lakehouse_silver.dbo.silver_openaq_measurements"
+SILVER_MEASUREMENTS_TABLE = (
+    "lakehouse_silver.dbo.silver_openaq_measurements"
+)
 SILVER_LOCATIONS_TABLE = "lakehouse_silver.dbo.silver_openaq_locations"
-SILVER_QUARANTINE_TABLE = "lakehouse_silver.dbo.silver_openaq_measurements_quarantine"
+SILVER_QUARANTINE_TABLE = (
+    "lakehouse_silver.dbo.silver_openaq_measurements_quarantine"
+)
 
-df_mesurements_raw = spark.table(BRONZE_MEASUREMENTS_TABLE)
-df_mesurements_raw.printSchema()
-# df_mesurements_raw.orderBy("sensor_id").show(
-#     df_mesurements_raw.count(),
-#     truncate=False
-# )
-# print(df_mesurements_raw.count())
-# display(df_mesurements_raw.summary())
-
-# df_locations_distinct = df_mesurements_raw.select("sensor_id").distinct()
-# df_locations_distinct.show(1000,truncate=False)
-# print(df_locations_distinct.count())
-# print(df_mesurements_raw.select("id").distinct().count())
-# df_mesurements_raw.summary().show()
+df_raw = spark.table(BRONZE_MEASUREMENTS_TABLE)
+df_raw.printSchema()
+df_raw.agg(
+    F.min("utc"),
+    F.max("utc"),
+    F.min("local"),
+    F.max("local"),
+).show(truncate=False)
 
 # MARKDOWN ********************
 
-# ## [1] PROFILE
+# ## [1] SCHEMA & TYPES
 
 # CELL ********************
+
 
 def remove_dots(df):
-    changes = {}
-    for c in df.columns:
-        changes[c] = c.replace(".","_")       
-    return df.withColumnsRenamed(changes)
+    for col_name in df.columns:
+        df = df.withColumnRenamed(col_name, col_name.replace(".", "_"))
+    return df
+
 
 def to_snake_case(df):
-    changes = {}
+    pattern = r"([a-z0-9])([A-Z])"
     for c in df.columns:
-            changes[c] = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", c).lower()     
-    return df.withColumnsRenamed(changes)
+        df = df.withColumnRenamed(c, re.sub(pattern, r"\1_\2", c).lower())
+    return df
 
-df_measurements_silver = remove_dots(df_mesurements_raw)
-df_measurements_silver = to_snake_case(df_measurements_silver)
-df_measurements_silver.printSchema()
-display(df_measurements_silver.summary())
-df_measurements_silver.summary().show(truncate=False)
+
+df_schema = remove_dots(df_raw)
+df_schema = to_snake_case(df_schema)
+df_schema.printSchema()
 
 # CELL ********************
 
-df_measurements_silver.filter(F.col("local").isNull()).show(truncate=False)
-df_measurements_silver.groupBy("has_flags").count().show()
-(df_measurements_silver.
- join(spark.table("lakehouse_silver.dbo.silver_openaq_locations"), on="sensor_id", how ="left").
-groupBy("parameter").agg(F.count("value"), F.min("value"), F.max("value")).show(truncate=False))
+df_openaq_locations = spark.table(SILVER_LOCATIONS_TABLE)
+df_schema.filter(F.col("local").isNull()).show(truncate=False)
+df_schema.groupBy("has_flags").count().show()
+(
+    df_schema
+    .join(df_openaq_locations, on="sensor_id", how="left")
+    .groupBy("parameter")
+    .agg(F.count("value"), F.min("value"), F.max("value"))
+    .show(truncate=False)
+)
 
 # MARKDOWN ********************
 
@@ -91,82 +100,99 @@ groupBy("parameter").agg(F.count("value"), F.min("value"), F.max("value")).show(
 
 OPENAQ_DQ_RULES = [
     F.when(F.col("value").isNull() | F.col("utc").isNull(), "NULL_VALUE"),
+    F.when(
+        F.col("local").isNull()
+        | F.to_date(F.substring(F.col("local"), 1, 10)).isNull(),
+        "NULL_LOCAL_TIME",
+    ),
     F.when(F.col("sensor_id").isNull(), "NULL_KEY"),
+    F.when(F.col("parameter").isNull(), "UNKNOWN_SENSOR"),
     F.when(F.col("has_flags"), "HAS_FLAGS"),
-    F.when((F.col("parameter") != "temperature") & (F.col("value") < 0),"NEGATIVE_POLLUTANT")
+    F.when(
+        (F.col("parameter") != "temperature") & (F.col("value") < 0),
+        "NEGATIVE_POLLUTANT",
+    ),
 ]
+
 
 def validate_openaq_quality(df, rules):
     raw_tags = F.concat_ws(", ", *rules)
     final_tag = F.when(raw_tags == "", "OK").otherwise(raw_tags)
     return df.withColumn("dq_error_reason", final_tag)
 
-df_openaq_locations = spark.table(SILVER_LOCATIONS_TABLE)
 
-df_measurements_joined = df_measurements_silver.join(df_openaq_locations.select("sensor_id", "parameter"), on = "sensor_id", how = "left")
-df_measurements_validated = validate_openaq_quality(df_measurements_joined,OPENAQ_DQ_RULES)
+df_joined = df_schema.join(
+    df_openaq_locations.select("sensor_id", "parameter"),
+    on="sensor_id",
+    how="left",
+)
+df_dq = validate_openaq_quality(
+    df_joined,
+    OPENAQ_DQ_RULES,
+)
 
-df_measurements_clean = df_measurements_validated.filter(F.col("dq_error_reason") == "OK")
-df_measurements_quarantine = df_measurements_validated.filter(F.col("dq_error_reason") != "OK")
+df_clean = df_dq.filter(
+    F.col("dq_error_reason") == "OK"
+)
+df_quarantine = df_dq.filter(
+    F.col("dq_error_reason") != "OK"
+)
 
-total, clean, dirty = df_measurements_validated.count(), df_measurements_clean.count(), df_measurements_quarantine.count()
+total = df_dq.count()
+clean = df_clean.count()
+dirty = df_quarantine.count()
+clean_pct = clean / total * 100
 
-print(f"Total: {total} | Clean: {clean} | Dirty: {dirty} | Clean %: ({clean / total * 100:.2f}%) | Total - (Clean + Dirty): {total - (clean + dirty)}")
+print(
+    f"Total: {total} | Clean: {clean} | Quarantine: {dirty} | "
+    f"Clean %: ({clean_pct:.2f}%) | Diff: {total - (clean + dirty)}"
+)
 
-
-df_measurements_validated.groupBy("dq_error_reason").count().show(truncate=False)
-
-df_measurements_clean.filter(F.col("value") < 0).select("parameter").distinct().show(truncate=False)
-
-df_measurements_silver.summary().show(truncate=False)
-
-
-
-
-# MARKDOWN ********************
-
-# ## [3] DEDUPLICATION
-
-# CELL ********************
-
-df_deduped = df_measurements_clean.dropDuplicates(["sensor_id","utc"])
-print(f"Before: {df_measurements_clean.count()} | After: {df_deduped.count()}")
-
-# MARKDOWN ********************
-
-# ## [4] ENRICHMENT
-
-# CELL ********************
-
-df_enriched = (df_deduped
-    .withColumn("measurement_date", F.to_date(F.substring(F.col("local"), 1, 10)))
-    .drop("dq_error_reason", "parameter"))
-
-df_enriched.show()
+summary = df_dq.groupBy("dq_error_reason").count()
+summary = summary.withColumn(
+    "percent",
+    F.round(F.col("count") / total * 100, 2),
+)
+summary.show(truncate=False)
 
 # MARKDOWN ********************
 
-# ## [5] WRITE DELTA
+# ## [3] DEDUPLICATE
 
 # CELL ********************
 
-print(spark.table(SILVER_LOCATIONS_TABLE).columns)
-spark.sql(f"DROP TABLE IF EXISTS {SILVER_MEASUREMENTS_TABLE}")
-(df_enriched.write
+df_final = (
+    df_clean
+    .withColumn(
+        "measurement_date",
+        F.to_date(F.substring(F.col("local"), 1, 10)),
+    )
+    .dropDuplicates(["sensor_id", "measurement_date"])
+    .drop("dq_error_reason", "parameter")
+)
+print(f"Before: {df_clean.count()} | After: {df_final.count()}")
+
+# MARKDOWN ********************
+
+# ## [4] WRITE DELTA
+
+# CELL ********************
+
+(
+    df_final.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_MEASUREMENTS_TABLE))
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_MEASUREMENTS_TABLE)
+)
 
-spark.sql(f"DROP TABLE IF EXISTS {SILVER_QUARANTINE_TABLE}")
-(df_measurements_quarantine.write
+(
+    df_quarantine.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_QUARANTINE_TABLE))
-
-spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
-
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_QUARANTINE_TABLE)
+)
 
 print(spark.table(SILVER_MEASUREMENTS_TABLE).count())
 print(spark.table(SILVER_QUARANTINE_TABLE).count())

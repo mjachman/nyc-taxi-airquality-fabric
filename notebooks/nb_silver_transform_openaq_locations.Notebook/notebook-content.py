@@ -25,28 +25,29 @@
 
 # MARKDOWN ********************
 
+# # Silver Transform: OpenAQ Locations
+
+# MARKDOWN ********************
+
 # ## [0] PROFILE
 
 # CELL ********************
 
 from pyspark.sql import functions as F
+
 BRONZE_LOCATIONS_TABLE = "lakehouse_bronze.dbo.bronze_openaq_locations"
 SILVER_LOCATIONS_TABLE = "lakehouse_silver.dbo.silver_openaq_locations"
-
-df_locations_raw = spark.table(BRONZE_LOCATIONS_TABLE)
-df_locations_raw.printSchema()
-df_locations_raw.orderBy("sensor_id").show(
-    df_locations_raw.count(),
-    truncate=False
+SILVER_LOCATIONS_QUARANTINE = (
+    "lakehouse_silver.dbo.silver_openaq_locations_quarantine"
 )
-print(df_locations_raw.count())
-df_locations_raw.summary("count","min","max").show()
 
-df_locations_distinct = df_locations_raw.select("sensor_id").distinct()
-df_locations_distinct.show(1000,truncate=False)
-print(df_locations_distinct.count())
-print(df_locations_raw.select("id").distinct().count())
-df_locations_raw.summary().show()
+df_raw = spark.table(BRONZE_LOCATIONS_TABLE)
+df_raw.printSchema()
+print(df_raw.count())
+df_raw.summary("count", "min", "max").show()
+
+print(df_raw.select("sensor_id").distinct().count())
+print(df_raw.select("id").distinct().count())
 
 
 # METADATA ********************
@@ -58,11 +59,13 @@ df_locations_raw.summary().show()
 
 # CELL ********************
 
-df_locations_raw.select("parameter","units").distinct().show(truncate=False)
-df_locations_raw.agg(F.max("datetime_first_utc"),
-                     F.max("datetime_last_utc"),
-                     F.min("datetime_first_utc"),
-                     F.min("datetime_last_utc")).show()
+df_raw.select("parameter", "units").distinct().show(truncate=False)
+df_raw.agg(
+    F.max("datetime_first_utc"),
+    F.max("datetime_last_utc"),
+    F.min("datetime_first_utc"),
+    F.min("datetime_last_utc"),
+).show()
 
 
 # METADATA ********************
@@ -78,19 +81,19 @@ df_locations_raw.agg(F.max("datetime_first_utc"),
 
 # CELL ********************
 
-non_snake_case_columns_replacement_dict = {
-    "ID": "location_id",
-    "isMonitor" : "is_monitor",
+COLUMN_RENAMES = {
+    "id": "location_id",
+    "isMonitor": "is_monitor",
 }
 
-def rename_columns(df, rename_dict):
-   return df.withColumnsRenamed(rename_dict)
 
-df_locations_silver = rename_columns(df_locations_raw,non_snake_case_columns_replacement_dict)
-df_locations_silver = df_locations_silver.dropDuplicates(subset = ["sensor_id"])
-df_locations_silver = df_locations_silver.fillna({"locality" : "Unknown"})
-df_locations_silver.printSchema()
-df_locations_silver.show(truncate=False)
+def rename_columns(df, rename_dict):
+    return df.withColumnsRenamed(rename_dict)
+
+
+df_schema = rename_columns(df_raw, COLUMN_RENAMES)
+df_schema = df_schema.fillna({"locality": "Unknown"})
+df_schema.printSchema()
 
 
 # METADATA ********************
@@ -102,18 +105,93 @@ df_locations_silver.show(truncate=False)
 
 # MARKDOWN ********************
 
-# ## [3] WRITE DELTA
+# ## [2] QUALITY GATE
 
 # CELL ********************
 
-(df_locations_silver.write
+LOCATIONS_DQ_RULES = [
+    F.when(F.col("sensor_id").isNull(), "NULL_SENSOR_ID"),
+    F.when(F.col("location_id").isNull(), "NULL_LOCATION_ID"),
+    F.when(F.col("parameter").isNull(), "NULL_PARAMETER"),
+    F.when(F.col("units").isNull(), "NULL_UNITS"),
+]
+
+
+def flag_locations_quality(df):
+    errors = F.concat_ws(", ", *LOCATIONS_DQ_RULES)
+    tag = F.when(errors == "", "OK").otherwise(errors)
+    return df.withColumn("dq_error_reason", tag)
+
+
+df_dq = flag_locations_quality(df_schema)
+total = df_dq.count()
+df_clean = df_dq.filter(F.col("dq_error_reason") == "OK")
+df_quarantine = df_dq.filter(F.col("dq_error_reason") != "OK")
+clean = df_clean.count()
+dirty = df_quarantine.count()
+clean_pct = clean / total * 100
+print(
+    f"Total: {total} | Clean: {clean} | Quarantine: {dirty} | "
+    f"Clean %: ({clean_pct:.2f}%) | Diff: {total - (clean + dirty)}"
+)
+
+summary = df_dq.groupBy("dq_error_reason").count()
+summary = summary.withColumn(
+    "percent",
+    F.round(F.col("count") / total * 100, 2),
+)
+summary.show(truncate=False)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# MARKDOWN ********************
+
+# ## [3] DEDUPLICATE
+
+# CELL ********************
+
+df_final = df_clean.dropDuplicates(
+    subset=["sensor_id"]
+).drop("dq_error_reason")
+print(f"Before: {clean} | After: {df_final.count()}")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# MARKDOWN ********************
+
+# ## [4] WRITE DELTA
+
+# CELL ********************
+
+(
+    df_final.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_LOCATIONS_TABLE))
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_LOCATIONS_TABLE)
+)
 
-spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
+(
+    df_quarantine.write
+    .format("delta")
+    .mode("overwrite")
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_LOCATIONS_QUARANTINE)
+)
+
 print(spark.table(SILVER_LOCATIONS_TABLE).count())
+print(spark.table(SILVER_LOCATIONS_QUARANTINE).count())
 
 # METADATA ********************
 

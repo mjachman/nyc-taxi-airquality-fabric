@@ -25,6 +25,10 @@
 
 # MARKDOWN ********************
 
+# # Silver Transform: ECB FX Rates
+
+# MARKDOWN ********************
+
 # ## [0] PROFILE
 
 # CELL ********************
@@ -36,9 +40,14 @@ BRONZE_ECB_FX_TABLE = "lakehouse_bronze.dbo.bronze_ecb_fx"
 SILVER_ECB_FX_TABLE = "lakehouse_silver.dbo.silver_ecb_fx"
 SILVER_ECB_FX_QUARANTINE = "lakehouse_silver.dbo.silver_ecb_fx_quarantine"
 
-df_fx_raw = spark.table(BRONZE_ECB_FX_TABLE)
-df_fx_raw.printSchema()
-df_fx_raw.summary().show(vertical = True)
+df_raw = spark.table(BRONZE_ECB_FX_TABLE)
+df_raw.printSchema()
+df_raw.summary().show(vertical=True)
+df_raw.agg(
+    F.min("TIME_PERIOD"),
+    F.max("TIME_PERIOD"),
+    F.count("TIME_PERIOD"),
+).show()
 
 
 # MARKDOWN ********************
@@ -48,17 +57,19 @@ df_fx_raw.summary().show(vertical = True)
 # CELL ********************
 
 RENAMED_COLUMNS = {
-"TIME_PERIOD" : "rate_date",
-"CURRENCY" : "currency",
-"CURRENCY_DENOM" : "currency_denom",
-"OBS_VALUE" : "exchange_rate",
-"OBS_STATUS" : "obs_status"
+    "TIME_PERIOD": "rate_date",
+    "CURRENCY": "currency",
+    "CURRENCY_DENOM": "currency_denom",
+    "OBS_VALUE": "exchange_rate",
+    "OBS_STATUS": "obs_status",
 }
-df_fx_silver = df_fx_raw.select("TIME_PERIOD","CURRENCY","CURRENCY_DENOM","OBS_VALUE","OBS_STATUS")
-df_fx_silver = df_fx_silver.withColumnsRenamed(RENAMED_COLUMNS)
-df_fx_silver = df_fx_silver.withColumn("exchange_rate",F.col("exchange_rate").cast(DecimalType(10,4)))
-df_fx_silver.printSchema()
-df_fx_silver.show(df_fx_silver.count(),truncate=False)
+df_schema = df_raw.select(list(RENAMED_COLUMNS))
+df_schema = df_schema.withColumnsRenamed(RENAMED_COLUMNS)
+df_schema = df_schema.withColumn(
+    "exchange_rate",
+    F.col("exchange_rate").cast(DecimalType(10, 4)),
+)
+df_schema.printSchema()
 
 
 # MARKDOWN ********************
@@ -67,24 +78,42 @@ df_fx_silver.show(df_fx_silver.count(),truncate=False)
 
 # CELL ********************
 
-FX_DQ_RULES = [F.when((F.col("rate_date").isNull()), "INVALID_DATE"),
-               F.when(F.col("exchange_rate").isNull() | (F.col("exchange_rate") <= 0), "INVALID_EXCHANGE_RATE")]
+FX_DQ_RULES = [
+    F.when(F.col("rate_date").isNull(), "INVALID_DATE"),
+    F.when(
+        F.col("exchange_rate").isNull() | (F.col("exchange_rate") <= 0),
+        "INVALID_EXCHANGE_RATE",
+    ),
+]
+
 
 def flag_fx_quality(df):
-    errors = F.concat_ws(
-        ", ", *FX_DQ_RULES)
-    return df.withColumn("dq_error_reason", F.when(errors == "", "OK").otherwise(errors))
+    errors = F.concat_ws(", ", *FX_DQ_RULES)
+    tag = F.when(errors == "", "OK").otherwise(errors)
+    return df.withColumn("dq_error_reason", tag)
 
 
-df_fx_total= flag_fx_quality(df_fx_silver)
-total = df_fx_total.count()
+df_dq = flag_fx_quality(df_schema)
+total = df_dq.count()
 
-summary = df_fx_total.groupBy("dq_error_reason").count()
-summary = summary.withColumn("percent", F.round(F.col("count") / total * 100, 2))
+df_clean = df_dq.filter(
+    F.col("dq_error_reason") == "OK"
+).drop("dq_error_reason", "obs_status")
+df_quarantine = df_dq.filter(F.col("dq_error_reason") != "OK")
 
-df_fx_clean = df_fx_total.filter(F.col("dq_error_reason") == "OK").drop("dq_error_reason","obs_status")
+clean = df_clean.count()
+dirty = df_quarantine.count()
+clean_pct = clean / total * 100
+print(
+    f"Total: {total} | Clean: {clean} | Quarantine: {dirty} | "
+    f"Clean %: ({clean_pct:.2f}%) | Diff: {total - (clean + dirty)}"
+)
 
-df_fx_quarantine = df_fx_total.filter(F.col("dq_error_reason") != "OK")
+summary = df_dq.groupBy("dq_error_reason").count()
+summary = summary.withColumn(
+    "percent",
+    F.round(F.col("count") / total * 100, 2),
+)
 summary.show(truncate=False)
 
 # MARKDOWN ********************
@@ -93,9 +122,8 @@ summary.show(truncate=False)
 
 # CELL ********************
 
-df_fx_dedup = df_fx_clean.dropDuplicates(["rate_date"])
-df_fx_dedup.show()
-print(f"{df_fx_clean.count()} | {df_fx_dedup.count()}")
+df_final = df_clean.dropDuplicates(["rate_date"])
+print(f"{df_clean.count()} | {df_final.count()}")
 
 # MARKDOWN ********************
 
@@ -103,18 +131,21 @@ print(f"{df_fx_clean.count()} | {df_fx_dedup.count()}")
 
 # CELL ********************
 
-(df_fx_dedup.write
+(
+    df_final.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_ECB_FX_TABLE))
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_ECB_FX_TABLE)
+)
 
-(df_fx_quarantine.write
+(
+    df_quarantine.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_ECB_FX_QUARANTINE))
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_ECB_FX_QUARANTINE)
+)
 
-spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
 print(spark.table(SILVER_ECB_FX_TABLE).count())
 print(spark.table(SILVER_ECB_FX_QUARANTINE).count())

@@ -34,18 +34,30 @@
 # CELL ********************
 
 import re
+
 from pyspark.sql import functions as F
 from pyspark.sql.types import DecimalType
 
-BRONZE_TAXI_PATH = "abfss://FabricCourseProject@onelake.dfs.fabric.microsoft.com/lakehouse_bronze.Lakehouse/Files/taxi"
+BRONZE_TAXI_PATH = (
+    "abfss://FabricCourseProject@onelake.dfs.fabric.microsoft.com/"
+    "lakehouse_bronze.Lakehouse/Files/taxi"
+)
 SILVER_TAXI_TABLE = "lakehouse_silver.dbo.silver_taxi_trips"
 SILVER_QUARANTINE_TABLE = "lakehouse_silver.dbo.silver_taxi_quarantine"
 
 MAX_TRIP_DISTANCE = 500
 MAX_FARE = 5000
 MAX_DURATION_SECONDS = 86400
+SECONDS_PER_MINUTE = 60
 
-INT_COLUMNS = ["vendor_id", "pu_location_id", "do_location_id", "passenger_count", "ratecode_id", "payment_type"]
+INT_COLUMNS = [
+    "vendor_id",
+    "pu_location_id",
+    "do_location_id",
+    "passenger_count",
+    "ratecode_id",
+    "payment_type",
+]
 RENAMED_BRONZE = {
     "VendorID": "vendor_id",
     "RatecodeID": "ratecode_id",
@@ -54,21 +66,35 @@ RENAMED_BRONZE = {
     "Airport_fee": "airport_fee",
 }
 
+
+def cast_int_columns(df, columns):
+    for col_name in columns:
+        df = df.withColumn(col_name, F.col(col_name).cast("bigint"))
+    return df
+
+
 def read_taxi_file(file_info):
     df = spark.read.parquet(file_info.path).withColumnsRenamed(RENAMED_BRONZE)
-    for col_name in INT_COLUMNS:
-        df = df.withColumn(col_name, F.col(col_name).cast("bigint"))
-    month_tag = re.search(r"\d{4}-\d{2}", file_info.name).group(0)
-    return df.withColumn("expected_month", F.lit(month_tag))
+    df = cast_int_columns(df, INT_COLUMNS)
+    m = re.search(r"\d{4}-\d{2}", file_info.name)
+    return df.withColumn("expected_month", F.lit(m.group(0) if m else ""))
 
-df_raw_taxi = None
+
+df_raw = None
 
 for file_info in mssparkutils.fs.ls(BRONZE_TAXI_PATH):
     if file_info.name.endswith(".parquet"):
         df_part = read_taxi_file(file_info)
-        df_raw_taxi = df_part if df_raw_taxi is None else df_raw_taxi.unionByName(df_part, allowMissingColumns=True)
-df_raw_taxi.printSchema()
-print(df_raw_taxi.count())
+        if df_raw is None:
+            df_raw = df_part
+        else:
+            df_raw = df_raw.unionByName(
+                df_part,
+                allowMissingColumns=True,
+            )
+
+df_raw.printSchema()
+print(df_raw.count())
 
 # METADATA ********************
 
@@ -79,7 +105,13 @@ print(df_raw_taxi.count())
 
 # CELL ********************
 
-df_raw_taxi.summary().show(vertical=True)
+df_raw.summary().show(vertical=True)
+df_raw.agg(
+    F.min("tpep_pickup_datetime"),
+    F.max("tpep_pickup_datetime"),
+    F.min("tpep_dropoff_datetime"),
+    F.max("tpep_dropoff_datetime"),
+).show(truncate=False)
 
 # METADATA ********************
 
@@ -107,26 +139,25 @@ MONEY_COLUMNS = [
     "cbd_congestion_fee",
 ]
 
+
 def cast_money_columns(df, columns):
-    changes = {}
     for c in columns:
-        if c in df.columns:
-            changes[c] = F.col(c).cast(DecimalType(10, 2))
-        else:
-            changes[c] = F.lit(0).cast(DecimalType(10, 2))
-    return df.withColumns(changes)
+        val = F.col(c) if c in df.columns else F.lit(0)
+        df = df.withColumn(c, val.cast(DecimalType(10, 2)))
+    return df
+
 
 def convert_ntz_to_timestamp(df):
-    changes = {}
     for field in df.schema.fields:
         if field.dataType.simpleString() == "timestamp_ntz":
-            changes[field.name] = F.col(field.name).cast("timestamp")
-    return df.withColumns(changes) if changes else df
+            df = df.withColumn(field.name, F.col(field.name).cast("timestamp"))
+    return df
 
-df_taxi_silver = cast_money_columns(df_raw_taxi, MONEY_COLUMNS)
-df_taxi_silver = convert_ntz_to_timestamp(df_taxi_silver)
-df_taxi_silver = df_taxi_silver.fillna({"cbd_congestion_fee": 0, "airport_fee": 0})
-df_taxi_silver.printSchema()
+
+df_schema = cast_money_columns(df_raw, MONEY_COLUMNS)
+df_schema = convert_ntz_to_timestamp(df_schema)
+df_schema = df_schema.fillna({"cbd_congestion_fee": 0, "airport_fee": 0})
+df_schema.printSchema()
 
 # METADATA ********************
 
@@ -137,28 +168,69 @@ df_taxi_silver.printSchema()
 
 # MARKDOWN ********************
 
-# ## [2] Quality Gate
+# ## [2] QUALITY GATE
 
 # CELL ********************
 
-TAXI_DQ_RULES = [ F.when((F.col("fare_amount") < 0) | (F.col("total_amount") < 0), "NEGATIVE_FARE"),
-        F.when(F.col("tpep_dropoff_datetime") <= F.col("tpep_pickup_datetime"), "INVALID_TIME"),
-        F.when(F.date_format(F.col("tpep_pickup_datetime"), "yyyy-MM") != F.col("expected_month"), "INVALID_DATE"),
-        F.when(F.col("trip_distance")>MAX_TRIP_DISTANCE,"INVALID_DISTANCE"),
-        F.when(F.col("fare_amount")>MAX_FARE,"EXTREME_FARE"),
-        F.when(F.unix_timestamp(F.col("tpep_dropoff_datetime")) - F.unix_timestamp(F.col("tpep_pickup_datetime")) > MAX_DURATION_SECONDS,"EXTREME_DURATION")]
+TAXI_DQ_RULES = [
+    F.when(
+        F.col("tpep_pickup_datetime").isNull()
+        | F.col("tpep_dropoff_datetime").isNull()
+        | F.col("pu_location_id").isNull()
+        | F.col("do_location_id").isNull()
+        | F.col("fare_amount").isNull()
+        | F.col("total_amount").isNull()
+        | F.col("trip_distance").isNull(),
+        "NULL_CRITICAL_FIELD",
+    ),
+    F.when(
+        (F.col("fare_amount") < 0) | (F.col("total_amount") < 0),
+        "NEGATIVE_FARE",
+    ),
+    F.when(
+        F.col("tpep_dropoff_datetime") <= F.col("tpep_pickup_datetime"),
+        "INVALID_TIME",
+    ),
+    F.when(F.col("expected_month") == "", "MISSING_FILE_MONTH"),
+    F.when(
+        (F.col("expected_month") != "")
+        & (
+            F.date_format(F.col("tpep_pickup_datetime"), "yyyy-MM")
+            != F.col("expected_month")
+        ),
+        "INVALID_DATE",
+    ),
+    F.when(
+        (F.col("trip_distance") < 0)
+        | (F.col("trip_distance") > MAX_TRIP_DISTANCE),
+        "INVALID_DISTANCE",
+    ),
+    F.when(F.col("fare_amount") > MAX_FARE, "EXTREME_FARE"),
+    F.when(
+        (
+            F.unix_timestamp(F.col("tpep_dropoff_datetime"))
+            - F.unix_timestamp(F.col("tpep_pickup_datetime"))
+        )
+        > MAX_DURATION_SECONDS,
+        "EXTREME_DURATION",
+    ),
+]
+
 
 def flag_taxi_quality(df):
-    errors = F.concat_ws(
-        ", ", *TAXI_DQ_RULES)
-    return df.withColumn("dq_error_reason", F.when(errors == "", "OK").otherwise(errors))
+    errors = F.concat_ws(", ", *TAXI_DQ_RULES)
+    tag = F.when(errors == "", "OK").otherwise(errors)
+    return df.withColumn("dq_error_reason", tag)
 
 
-df_taxi_silver = flag_taxi_quality(df_taxi_silver)
-total = df_taxi_silver.count()
-summary = df_taxi_silver.groupBy("dq_error_reason").count()
-summary = summary.withColumn("percent", F.round(F.col("count") / total * 100, 2))
-display(summary)
+df_dq = flag_taxi_quality(df_schema)
+total = df_dq.count()
+summary = df_dq.groupBy("dq_error_reason").count()
+summary = summary.withColumn(
+    "percent",
+    F.round(F.col("count") / total * 100, 2),
+)
+summary.show(truncate=False)
 
 # METADATA ********************
 
@@ -169,10 +241,15 @@ display(summary)
 
 # CELL ********************
 
-df_taxi_clean = df_taxi_silver.filter(F.col("dq_error_reason") == "OK")
-df_taxi_quarantine = df_taxi_silver.filter(F.col("dq_error_reason") != "OK")
-print(df_taxi_clean.count())
-print(df_taxi_quarantine.count())
+df_clean = df_dq.filter(F.col("dq_error_reason") == "OK")
+df_quarantine = df_dq.filter(F.col("dq_error_reason") != "OK")
+clean = df_clean.count()
+dirty = df_quarantine.count()
+clean_pct = clean / total * 100
+print(
+    f"Total: {total} | Clean: {clean} | Quarantine: {dirty} | "
+    f"Clean %: ({clean_pct:.2f}%) | Diff: {total - (clean + dirty)}"
+)
 
 # METADATA ********************
 
@@ -183,14 +260,22 @@ print(df_taxi_quarantine.count())
 
 # MARKDOWN ********************
 
-# ## [3] DEDUPLICATION
+# ## [3] DEDUPLICATE
 
 # CELL ********************
 
-DEDUPLICATE_KEYS = ["vendor_id","tpep_pickup_datetime", "tpep_dropoff_datetime", "pu_location_id", "do_location_id", "trip_distance", "total_amount"]
-before_count = df_taxi_clean.count()
-df_taxi_clean = df_taxi_clean.dropDuplicates(subset = DEDUPLICATE_KEYS)
-after_count = df_taxi_clean.count()
+DEDUPLICATE_KEYS = [
+    "vendor_id",
+    "tpep_pickup_datetime",
+    "tpep_dropoff_datetime",
+    "pu_location_id",
+    "do_location_id",
+    "trip_distance",
+    "total_amount",
+]
+before_count = df_clean.count()
+df_deduped = df_clean.dropDuplicates(subset=DEDUPLICATE_KEYS)
+after_count = df_deduped.count()
 print(f"Dropped duplicates: {before_count - after_count}")
 
 # METADATA ********************
@@ -202,21 +287,38 @@ print(f"Dropped duplicates: {before_count - after_count}")
 
 # MARKDOWN ********************
 
-# ## [4] ENRICHMENT
+# ## [4] ENRICH
 
 # CELL ********************
 
-df_taxi_clean = df_taxi_clean.withColumn("pickup_date", F.to_date(F.col("tpep_pickup_datetime")))
-df_taxi_clean = df_taxi_clean.drop("dq_error_reason", "expected_month")
-df_taxi_clean = df_taxi_clean.withColumn(
-    "trip_duration_minutes",
-    F.round(
-        (F.unix_timestamp("tpep_dropoff_datetime") - F.unix_timestamp("tpep_pickup_datetime")) / 60,
-        2,
-    ),
+duration_seconds = (
+    F.unix_timestamp("tpep_dropoff_datetime")
+    - F.unix_timestamp("tpep_pickup_datetime")
 )
-print(df_taxi_clean.count())
-df_taxi_clean.printSchema()
+df_final = (
+    df_deduped
+    .withColumn("pickup_date", F.to_date(F.col("tpep_pickup_datetime")))
+    .withColumn(
+        "trip_duration_minutes",
+        F.round(duration_seconds / SECONDS_PER_MINUTE, 2),
+    )
+    .drop("dq_error_reason", "expected_month")
+)
+print(df_final.count())
+df_final.printSchema()
+df_final.select(
+    "fare_amount",
+    "total_amount",
+    "trip_distance",
+    "trip_duration_minutes",
+    "pu_location_id",
+    "do_location_id",
+).summary("count", "min", "max").show()
+df_final.select(
+    F.count("pickup_date"),
+    F.min("pickup_date"),
+    F.max("pickup_date"),
+).show()
 
 # METADATA ********************
 
@@ -231,31 +333,22 @@ df_taxi_clean.printSchema()
 
 # CELL ********************
 
-df_taxi_clean.select("fare_amount", "total_amount", "trip_distance", "trip_duration_minutes", "pickup_date", "pu_location_id", "do_location_id").summary("count", "min", "max").show()
-df_taxi_clean.select(F.count("pickup_date"),F.min("pickup_date"),F.max("pickup_date")).show()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-(df_taxi_clean.write
+(
+    df_final.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_TAXI_TABLE))
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_TAXI_TABLE)
+)
 
-(df_taxi_quarantine.write
+(
+    df_quarantine.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_QUARANTINE_TABLE))
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_QUARANTINE_TABLE)
+)
 
-spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
 print(spark.table(SILVER_TAXI_TABLE).count())
 print(spark.table(SILVER_QUARANTINE_TABLE).count())
 

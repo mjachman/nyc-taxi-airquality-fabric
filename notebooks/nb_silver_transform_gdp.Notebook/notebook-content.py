@@ -25,6 +25,10 @@
 
 # MARKDOWN ********************
 
+# # Silver Transform: World Bank US GDP
+
+# MARKDOWN ********************
+
 # ## [0] PROFILE
 
 # CELL ********************
@@ -34,12 +38,18 @@ from pyspark.sql.types import DecimalType
 
 BRONZE_GDP_TABLE = "lakehouse_bronze.dbo.bronze_world_bank_gdp"
 SILVER_GDP_TABLE = "lakehouse_silver.dbo.silver_world_bank_gdp"
-SILVER_GDP_QUARANTINE = "lakehouse_silver.dbo.silver_world_bank_gdp_quarantine"
+SILVER_GDP_QUARANTINE = (
+    "lakehouse_silver.dbo.silver_world_bank_gdp_quarantine"
+)
 
-df_gdp_raw = spark.table(BRONZE_GDP_TABLE)
-df_gdp_raw.show(df_gdp_raw.count(), truncate=False)
-df_gdp_raw.printSchema()
-df_gdp_raw.summary().show(truncate=False)
+df_raw = spark.table(BRONZE_GDP_TABLE)
+df_raw.printSchema()
+df_raw.summary().show(truncate=False)
+df_raw.agg(
+    F.min("date"),
+    F.max("date"),
+    F.count("date"),
+).show()
 
 
 # METADATA ********************
@@ -56,15 +66,24 @@ df_gdp_raw.summary().show(truncate=False)
 # CELL ********************
 
 RENAMED_COLUMNS = {
-"date" : "year",
-"countryiso3code" : "country_code",
+    "date": "year",
+    "countryiso3code": "country_code",
 }
-df_gdp_silver = df_gdp_raw.withColumnsRenamed(RENAMED_COLUMNS)
-df_gdp_silver = df_gdp_silver.select("year","country_code","country_name","indicator_id","indicator_name","value")
-df_gdp_silver = df_gdp_silver.withColumn("value",F.col("value").cast(DecimalType(18,2)))
+df_schema = df_raw.withColumnsRenamed(RENAMED_COLUMNS)
+df_schema = df_schema.select(
+    "year",
+    "country_code",
+    "country_name",
+    "indicator_id",
+    "indicator_name",
+    "value",
+)
+df_schema = df_schema.withColumn(
+    "value",
+    F.col("value").cast(DecimalType(18, 2)),
+)
 
-df_gdp_silver.printSchema()
-
+df_schema.printSchema()
 
 
 # METADATA ********************
@@ -80,25 +99,45 @@ df_gdp_silver.printSchema()
 
 # CELL ********************
 
-GDP_DQ_RULES = [ F.when(F.col("country_code").isNull(), "NULL_KEY"),
-                F.when(F.col("year").isNull(), "INVALID_YEAR"),
-               F.when(F.col("value").isNull() | (F.col("value") <= 0), "INVALID_GDP")]
+GDP_DQ_RULES = [
+    F.when(F.col("country_code").isNull(), "NULL_KEY"),
+    F.when(F.col("year").isNull(), "INVALID_YEAR"),
+    F.when(
+        F.col("value").isNull() | (F.col("value") <= 0),
+        "INVALID_GDP",
+    ),
+]
+
 
 def flag_gdp_quality(df):
-    errors = F.concat_ws(
-        ", ", *GDP_DQ_RULES)
-    return df.withColumn("dq_error_reason", F.when(errors == "", "OK").otherwise(errors))
+    errors = F.concat_ws(", ", *GDP_DQ_RULES)
+    tag = F.when(errors == "", "OK").otherwise(errors)
+    return df.withColumn("dq_error_reason", tag)
 
 
-df_gdp_total= flag_gdp_quality(df_gdp_silver)
-total = df_gdp_total.count()
+df_dq = flag_gdp_quality(df_schema)
+total = df_dq.count()
 
-summary = df_gdp_total.groupBy("dq_error_reason").count()
-summary = summary.withColumn("percent", F.round(F.col("count") / total * 100, 2))
+df_clean = df_dq.filter(
+    F.col("dq_error_reason") == "OK"
+).drop("dq_error_reason")
+df_quarantine = df_dq.filter(
+    F.col("dq_error_reason") != "OK"
+)
 
-df_gdp_clean = df_gdp_total.filter(F.col("dq_error_reason") == "OK").drop("dq_error_reason","obs_status")
+clean = df_clean.count()
+dirty = df_quarantine.count()
+clean_pct = clean / total * 100
+print(
+    f"Total: {total} | Clean: {clean} | Quarantine: {dirty} | "
+    f"Clean %: ({clean_pct:.2f}%) | Diff: {total - (clean + dirty)}"
+)
 
-# df_gdp_quarantine = df_gdp_total.filter(F.col("dq_error_reason") != "OK")
+summary = df_dq.groupBy("dq_error_reason").count()
+summary = summary.withColumn(
+    "percent",
+    F.round(F.col("count") / total * 100, 2),
+)
 summary.show(truncate=False)
 
 # METADATA ********************
@@ -114,9 +153,10 @@ summary.show(truncate=False)
 
 # CELL ********************
 
-df_gdp_dedup = df_gdp_clean.dropDuplicates(["year", "country_code", "indicator_id"])
-df_gdp_dedup.show()
-print(f"{df_gdp_clean.count()} | {df_gdp_dedup.count()}")
+df_final = df_clean.dropDuplicates(
+    ["year", "country_code", "indicator_id"]
+)
+print(f"{df_clean.count()} | {df_final.count()}")
 
 # METADATA ********************
 
@@ -131,22 +171,24 @@ print(f"{df_gdp_clean.count()} | {df_gdp_dedup.count()}")
 
 # CELL ********************
 
-(df_gdp_dedup.write
+(
+    df_final.write
     .format("delta")
     .mode("overwrite")
-    .option("overwriteSchema","true")
-    .saveAsTable(SILVER_GDP_TABLE))
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_GDP_TABLE)
+)
 
-# if df_gdp_quarantine.count() > 0:
-#     (df_gdp_quarantine.write
-#         .format("delta")
-#         .mode("overwrite")
-#         .option("overwriteSchema","true")
-#         .saveAsTable(SILVER_GDP_QUARANTINE))
+(
+    df_quarantine.write
+    .format("delta")
+    .mode("overwrite")
+    .option("overwriteSchema", "true")
+    .saveAsTable(SILVER_GDP_QUARANTINE)
+)
 
-spark.sql("SHOW TABLES IN lakehouse_silver.dbo").show()
 print(spark.table(SILVER_GDP_TABLE).count())
-# print(spark.table(SILVER_GDP_QUARANTINE).count())
+print(spark.table(SILVER_GDP_QUARANTINE).count())
 
 # METADATA ********************
 

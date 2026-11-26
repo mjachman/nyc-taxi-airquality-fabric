@@ -23,3 +23,7 @@ ref table DimHour
 ref table FactTaxiHourly
 ref table FactAirQualityDaily
 
+ref role EPA_Monitors_Only
+ref role Airport_Operations
+ref role NYC_Five_Boroughs
+

@@ -2,38 +2,6 @@ table FactTaxiDaily
 	lineageTag: 7aca4090-ffc8-4d06-81bd-f44623e48385
 	sourceLineageTag: [dbo].[FactTaxiDaily]
 
-	measure 'Total Trips' = SUM(FactTaxiDaily[trip_count])
-		formatString: #,0
-		lineageTag: c7433441-c7a7-49fa-b618-3693eace300d
-
-	measure 'Total Passengers' = SUM(FactTaxiDaily[total_passengers])
-		formatString: #,0
-		lineageTag: 31490e1d-b17e-45d4-ba9f-e006b468df03
-
-	measure 'Total Trip Distance (mi)' = SUM(FactTaxiDaily[total_distance])
-		formatString: #,0.00
-		lineageTag: e014b309-f1f3-454f-b88d-d1a6ef6fe54f
-
-	measure 'Avg Trip Duration (min)' = DIVIDE(SUM(FactTaxiDaily[total_duration_min]), SUM(FactTaxiDaily[trip_count]))
-		formatString: #,0.00
-		lineageTag: 3db13808-620b-4b96-bc6e-4e5e1c58e342
-
-	measure 'Avg Fare per Trip USD' = DIVIDE(SUM(FactTaxiDaily[total_fare_usd]), SUM(FactTaxiDaily[trip_count]))
-		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
-		lineageTag: 201fa24e-b55f-4ba1-bf58-b6cec6207649
-
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
-
-	measure 'Total Revenue USD' = SUM(FactTaxiDaily[total_amount_usd])
-		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
-		lineageTag: 9f4c2a1e-8b3d-4e7a-9c12-4a8e6b2d9011
-
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
-
-	measure 'Total Revenue EUR' = SUM(FactTaxiDaily[total_amount_eur])
-		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
-		lineageTag: 3d7a8e21-4c9b-4f12-a834-7c5d9e1f2022
-
 	measure 'Avg Revenue per Trip USD' = DIVIDE(SUM(FactTaxiDaily[total_amount_usd]), SUM(FactTaxiDaily[trip_count]))
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 57362a8b-200a-4968-8acc-8b497e3caa48
@@ -67,6 +35,38 @@ table FactTaxiDaily
 		changedProperty = Name
 
 		changedProperty = FormatString
+
+	measure 'Total Trips' = SUM(FactTaxiDaily[trip_count])
+		formatString: #,0
+		lineageTag: c7433441-c7a7-49fa-b618-3693eace300d
+
+	measure 'Total Passengers' = SUM(FactTaxiDaily[total_passengers])
+		formatString: #,0
+		lineageTag: 31490e1d-b17e-45d4-ba9f-e006b468df03
+
+	measure 'Total Trip Distance (mi)' = SUM(FactTaxiDaily[total_distance])
+		formatString: #,0.00
+		lineageTag: e014b309-f1f3-454f-b88d-d1a6ef6fe54f
+
+	measure 'Avg Trip Duration (min)' = DIVIDE(SUM(FactTaxiDaily[total_duration_min]), SUM(FactTaxiDaily[trip_count]))
+		formatString: #,0.00
+		lineageTag: 3db13808-620b-4b96-bc6e-4e5e1c58e342
+
+	measure 'Avg Fare per Trip USD' = DIVIDE(SUM(FactTaxiDaily[total_fare_usd]), SUM(FactTaxiDaily[trip_count]))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 201fa24e-b55f-4ba1-bf58-b6cec6207649
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Revenue USD' = SUM(FactTaxiDaily[total_amount_usd])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 9f4c2a1e-8b3d-4e7a-9c12-4a8e6b2d9011
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Revenue EUR' = SUM(FactTaxiDaily[total_amount_eur])
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		lineageTag: 3d7a8e21-4c9b-4f12-a834-7c5d9e1f2022
 
 	column date_key
 		dataType: dateTime
@@ -137,17 +137,6 @@ table FactTaxiDaily
 		sourceColumn: total_distance
 
 		changedProperty = FormatString
-
-		annotation SummarizationSetBy = Automatic
-
-	column total_duration_min
-		dataType: decimal
-		formatString: #,0.00
-		sourceProviderType: decimal(14, 2)
-		lineageTag: 4476d9e9-1f86-4fde-a70e-5c22c4b80034
-		sourceLineageTag: total_duration_min
-		summarizeBy: sum
-		sourceColumn: total_duration_min
 
 		annotation SummarizationSetBy = Automatic
 
@@ -228,6 +217,17 @@ table FactTaxiDaily
 		sourceColumn: total_amount_eur
 
 		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_duration_min
+		dataType: decimal
+		formatString: #,0.00
+		sourceProviderType: decimal(14, 2)
+		lineageTag: 4476d9e9-1f86-4fde-a70e-5c22c4b80034
+		sourceLineageTag: total_duration_min
+		summarizeBy: sum
+		sourceColumn: total_duration_min
 
 		annotation SummarizationSetBy = Automatic
 

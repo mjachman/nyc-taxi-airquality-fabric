@@ -1,0 +1,9 @@
+role NYC_Five_Boroughs
+	modelPermission: read
+
+	tablePermission DimSensors = [is_monitor] == true()
+
+	tablePermission DimZone = [borough] IN {"Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"}
+
+	annotation PBI_Id = 62aedbe9b3954fd8abb57e30e7386b0a
+

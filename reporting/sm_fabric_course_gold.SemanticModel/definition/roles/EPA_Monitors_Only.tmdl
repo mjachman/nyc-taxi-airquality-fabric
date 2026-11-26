@@ -1,0 +1,7 @@
+role EPA_Monitors_Only
+	modelPermission: read
+
+	tablePermission DimSensors = [is_monitor] == true()
+
+	annotation PBI_Id = 37a375f04b39426f8608ed11e39e4ba8
+

@@ -50,17 +50,6 @@ table FactTaxiHourly
 
 		annotation SummarizationSetBy = Automatic
 
-	column total_duration_min
-		dataType: decimal
-		formatString: #,0.00
-		sourceProviderType: decimal(14, 2)
-		lineageTag: 1088fc6d-33f0-4601-8d37-4b8009976948
-		sourceLineageTag: total_duration_min
-		summarizeBy: sum
-		sourceColumn: total_duration_min
-
-		annotation SummarizationSetBy = Automatic
-
 	column avg_duration_min
 		dataType: decimal
 		formatString: #,0.00
@@ -97,6 +86,17 @@ table FactTaxiHourly
 		sourceColumn: total_amount_eur
 
 		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_duration_min
+		dataType: decimal
+		formatString: #,0.00
+		sourceProviderType: decimal(14, 2)
+		lineageTag: 1088fc6d-33f0-4601-8d37-4b8009976948
+		sourceLineageTag: total_duration_min
+		summarizeBy: sum
+		sourceColumn: total_duration_min
 
 		annotation SummarizationSetBy = Automatic
 

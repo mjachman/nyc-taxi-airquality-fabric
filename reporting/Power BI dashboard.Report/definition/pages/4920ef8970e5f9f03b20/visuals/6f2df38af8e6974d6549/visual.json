@@ -4,10 +4,10 @@
   "position": {
     "x": 948.49411962837178,
     "y": 678.31700676453261,
-    "z": 5000,
+    "z": 4000,
     "height": 402.39144469082441,
     "width": 971.48791646784741,
-    "tabOrder": 5000
+    "tabOrder": 4000
   },
   "visual": {
     "visualType": "clusteredColumnChart",
@@ -113,42 +113,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "7e03fb685e035e61065e",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimHour"
-              }
-            },
-            "Property": "hour_label"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "f1bef2b838efda57bac7",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "FactTaxiHourly"
-                  }
-                },
-                "Property": "trip_count"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

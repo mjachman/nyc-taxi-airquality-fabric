@@ -127,14 +127,14 @@
             "centerLatitude": {
               "expr": {
                 "Literal": {
-                  "Value": "40.716468554835586D"
+                  "Value": "40.71941042586306D"
                 }
               }
             },
             "centerLongitude": {
               "expr": {
                 "Literal": {
-                  "Value": "-74.00216999999998D"
+                  "Value": "-74.00216499999999D"
                 }
               }
             },
@@ -178,89 +178,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "8afff84508f1b9bb93fe",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "FactAirQualityDaily"
-              }
-            },
-            "Property": "Weighted Avg AQ"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "ca47c26a4abfe74da850",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "DimSensors"
-                  }
-                },
-                "Property": "station_name"
-              }
-            },
-            "Function": 3
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "e3d0f7297fd5be9877a4",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "DimSensors"
-                  }
-                },
-                "Property": "is_monitor"
-              }
-            },
-            "Function": 5
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "ddadb0addbb89ff55839",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimSensors"
-              }
-            },
-            "Property": "longitude"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "7e7de1b124d4c80022d2",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimSensors"
-              }
-            },
-            "Property": "latitude"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

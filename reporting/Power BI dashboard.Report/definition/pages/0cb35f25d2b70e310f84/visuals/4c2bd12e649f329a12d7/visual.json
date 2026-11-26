@@ -2,15 +2,15 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "4c2bd12e649f329a12d7",
   "position": {
-    "x": 716.84468137580393,
-    "y": 617.76858720191228,
-    "z": 8000,
-    "height": 353.17713570222537,
-    "width": 489.55246532981732,
-    "tabOrder": 8000
+    "x": 717.38556313710319,
+    "y": 617.81154175529707,
+    "z": 7000,
+    "height": 461.66137186110114,
+    "width": 584.99737561811094,
+    "tabOrder": 7000
   },
   "visual": {
-    "visualType": "clusteredBarChart",
+    "visualType": "scatterChart",
     "query": {
       "queryState": {
         "Category": {
@@ -20,14 +20,33 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "DimZone"
+                      "Entity": "DimDate"
                     }
                   },
-                  "Property": "borough"
+                  "Property": "date_key"
                 }
               },
-              "queryRef": "DimZone.borough",
-              "nativeQueryRef": "borough",
+              "queryRef": "DimDate.date_key",
+              "nativeQueryRef": "date_key",
+              "active": true
+            }
+          ]
+        },
+        "X": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
+                    }
+                  },
+                  "Property": "Total Trips"
+                }
+              },
+              "queryRef": "FactTaxiDaily.Total Trips",
+              "nativeQueryRef": "Total Trips",
               "active": true
             }
           ]
@@ -36,47 +55,22 @@
           "projections": [
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "FactTaxiDaily"
-                        }
-                      },
-                      "Property": "trip_count"
+                    "SourceRef": {
+                      "Entity": "FactAirQualityDaily"
                     }
                   },
-                  "Function": 0
+                  "Property": "Weighted Avg AQ"
                 }
               },
-              "queryRef": "Sum(FactTaxiDaily.trip_count)",
-              "nativeQueryRef": "Sum of trip_count"
+              "queryRef": "FactAirQualityDaily.Weighted Avg AQ",
+              "nativeQueryRef": "Weighted Avg AQ"
             }
           ]
         }
       },
       "sortDefinition": {
-        "sort": [
-          {
-            "field": {
-              "Aggregation": {
-                "Expression": {
-                  "Column": {
-                    "Expression": {
-                      "SourceRef": {
-                        "Entity": "FactTaxiDaily"
-                      }
-                    },
-                    "Property": "trip_count"
-                  }
-                },
-                "Function": 0
-              }
-            },
-            "direction": "Descending"
-          }
-        ],
         "isDefaultSort": true
       }
     },

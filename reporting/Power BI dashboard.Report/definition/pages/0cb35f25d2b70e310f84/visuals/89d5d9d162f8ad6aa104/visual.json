@@ -1,16 +1,16 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
-  "name": "79906c7e63e3d81cab9a",
+  "name": "89d5d9d162f8ad6aa104",
   "position": {
-    "x": 1207.5627478135493,
-    "y": 617.76858720191228,
-    "z": 9000,
-    "height": 353.17713570222537,
-    "width": 576.9725484244276,
-    "tabOrder": 9000
+    "x": 1301.4285714285716,
+    "y": 618.57142857142856,
+    "z": 11000,
+    "height": 461.42857142857144,
+    "width": 614.28571428571433,
+    "tabOrder": 11000
   },
   "visual": {
-    "visualType": "clusteredBarChart",
+    "visualType": "scatterChart",
     "query": {
       "queryState": {
         "Category": {
@@ -20,14 +20,33 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "DimSensors"
+                      "Entity": "DimDate"
                     }
                   },
-                  "Property": "station_name"
+                  "Property": "date_key"
                 }
               },
-              "queryRef": "DimSensors.station_name",
-              "nativeQueryRef": "station_name",
+              "queryRef": "DimDate.date_key",
+              "nativeQueryRef": "date_key",
+              "active": true
+            }
+          ]
+        },
+        "X": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
+                    }
+                  },
+                  "Property": "Total Trip Distance (mi)"
+                }
+              },
+              "queryRef": "FactTaxiDaily.Total Trip Distance (mi)",
+              "nativeQueryRef": "Total Trip Distance (mi)",
               "active": true
             }
           ]
@@ -52,21 +71,6 @@
         }
       },
       "sortDefinition": {
-        "sort": [
-          {
-            "field": {
-              "Measure": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "FactAirQualityDaily"
-                  }
-                },
-                "Property": "Weighted Avg AQ"
-              }
-            },
-            "direction": "Descending"
-          }
-        ],
         "isDefaultSort": true
       }
     },

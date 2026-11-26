@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "510d1c86b4004a471a31",
   "position": {
-    "x": 1073.8103124035142,
-    "y": 48.286973362898927,
-    "z": 8000,
-    "height": 163.25595756027732,
-    "width": 194.29758329356949,
-    "tabOrder": 8000
+    "x": 1074.2581837381204,
+    "y": 88.976322841702654,
+    "z": 3500,
+    "height": 125,
+    "width": 160,
+    "tabOrder": 7000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -55,6 +55,49 @@
             "id": "default"
           }
         }
+      ],
+      "label": [
+        {
+          "properties": {
+            "textWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "matchValueAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'aboveValue'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "layout": [
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'bottom'"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -93,28 +136,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "e44a9b43472ea6533368",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "FactTaxiDaily"
-                  }
-                },
-                "Property": "total_distance"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

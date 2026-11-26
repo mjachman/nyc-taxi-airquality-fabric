@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "3f2f73c24c754f049bc8",
   "position": {
-    "x": 1032.722581624329,
-    "y": 48.955246532981732,
+    "x": 992.34564490731782,
+    "y": 41.866349899168483,
     "z": 2000,
-    "height": 458.08123541575765,
-    "width": 887.02244313331187,
+    "height": 458.26680295035771,
+    "width": 927.84883560319338,
     "tabOrder": 2000
   },
   "visual": {
@@ -27,8 +27,9 @@
                 }
               },
               "queryRef": "DimDate.date_key",
-              "nativeQueryRef": "date_key",
-              "active": true
+              "nativeQueryRef": "date",
+              "active": true,
+              "displayName": "date"
             }
           ]
         },

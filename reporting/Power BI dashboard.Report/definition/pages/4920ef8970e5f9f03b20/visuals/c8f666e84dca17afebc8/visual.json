@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "c8f666e84dca17afebc8",
   "position": {
-    "x": 922.0512532629748,
-    "y": 48.286973362898927,
-    "z": 3000,
-    "height": 162.10626771830354,
-    "width": 151.75905914053948,
-    "tabOrder": 3000
+    "x": 925.96432342736455,
+    "y": 87.885926810005941,
+    "z": 1000,
+    "height": 125,
+    "width": 160,
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -17,51 +17,67 @@
           "projections": [
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "FactTaxiDaily"
-                        }
-                      },
-                      "Property": "total_passengers"
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
                     }
                   },
-                  "Function": 0
+                  "Property": "Total Passengers"
                 }
               },
-              "queryRef": "Sum(FactTaxiDaily.total_passengers)",
-              "nativeQueryRef": "Total Passengers",
-              "displayName": "Total Passengers"
+              "queryRef": "FactTaxiDaily.Total Passengers",
+              "nativeQueryRef": "Total Passengers1"
             }
           ]
         }
       }
     },
-    "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "0abe67f5dee691b55840",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "FactTaxiDaily"
-                  }
-                },
-                "Property": "total_passengers"
+    "objects": {
+      "label": [
+        {
+          "properties": {
+            "textWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
               }
             },
-            "Function": 0
+            "matchValueAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'aboveValue'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
           }
-        },
-        "type": "Advanced"
-      }
-    ]
+        }
+      ],
+      "layout": [
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'bottom'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

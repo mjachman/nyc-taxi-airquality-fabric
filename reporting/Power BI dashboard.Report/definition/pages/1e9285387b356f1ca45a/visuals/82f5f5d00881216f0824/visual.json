@@ -3,10 +3,10 @@
   "name": "82f5f5d00881216f0824",
   "position": {
     "x": 0,
-    "y": 294.3205995452887,
+    "y": 294.19597226442721,
     "z": 0,
-    "height": 395.13877558763824,
-    "width": 144.53453738308892,
+    "height": 439.03091245614519,
+    "width": 144.834940191718,
     "tabOrder": 0
   },
   "visual": {
@@ -81,7 +81,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'pm10'"
+                                "Value": "'pm25'"
                               }
                             }
                           ]
@@ -115,6 +115,28 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Pollutant'"
                 }
               }
             }

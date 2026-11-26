@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "7243607c94d741898ca8",
   "position": {
-    "x": 959.50217399976066,
-    "y": 412.96581435238744,
+    "x": 959.53593872011311,
+    "y": 310.70687539508424,
     "z": 6000,
-    "height": 517.12633132554151,
-    "width": 936.21923491164387,
+    "height": 768.771055665043,
+    "width": 960.67824340906566,
     "tabOrder": 6000
   },
   "visual": {
@@ -27,8 +27,9 @@
                 }
               },
               "queryRef": "DimDate.date_key",
-              "nativeQueryRef": "date_key",
-              "active": true
+              "nativeQueryRef": "date",
+              "active": true,
+              "displayName": "date"
             }
           ]
         },
@@ -71,5 +72,37 @@
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "2dfc4b54d2b4e08dae11",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "DimDate"
+              }
+            },
+            "Property": "date_key"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "4bcc2870a84c07ddd856",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "DimFX"
+              }
+            },
+            "Property": "Avg FX Rate"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

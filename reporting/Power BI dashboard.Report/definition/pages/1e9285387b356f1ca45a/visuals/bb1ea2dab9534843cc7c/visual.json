@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "bb1ea2dab9534843cc7c",
   "position": {
-    "x": 576.68439666545021,
-    "y": 153.13863081370877,
+    "x": 573.682145915633,
+    "y": 153.88712395370038,
     "z": 7000,
     "height": 131.71292519587942,
     "width": 157.35614957029841,
@@ -32,8 +32,8 @@
                 }
               },
               "queryRef": "Min(DimSensors.units)",
-              "nativeQueryRef": "unit",
-              "displayName": "unit"
+              "nativeQueryRef": "Unit",
+              "displayName": "Unit"
             }
           ]
         }
@@ -55,28 +55,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "dc0166d00fa394178811",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "DimSensors"
-                  }
-                },
-                "Property": "units"
-              }
-            },
-            "Function": 3
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

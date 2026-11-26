@@ -3,11 +3,11 @@
   "name": "7800aa1623bed39eb706",
   "position": {
     "x": 0,
-    "y": 617.76858720191228,
-    "z": 3000,
-    "height": 353.17713570222537,
-    "width": 716.84468137580393,
-    "tabOrder": 3000
+    "y": 617.81154175529707,
+    "z": 2000,
+    "height": 461.66137186110114,
+    "width": 717.38556313710319,
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "lineClusteredColumnComboChart",
@@ -36,22 +36,17 @@
           "projections": [
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "FactTaxiDaily"
-                        }
-                      },
-                      "Property": "trip_count"
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
                     }
                   },
-                  "Function": 0
+                  "Property": "Total Trips"
                 }
               },
-              "queryRef": "Sum(FactTaxiDaily.trip_count)",
-              "nativeQueryRef": "Sum of trip_count"
+              "queryRef": "FactTaxiDaily.Total Trips",
+              "nativeQueryRef": "Total Trips"
             }
           ]
         },
@@ -90,6 +85,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Trend line 1'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "valueAxis": [
+        {
+          "properties": {
+            "secStart": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
                 }
               }
             }

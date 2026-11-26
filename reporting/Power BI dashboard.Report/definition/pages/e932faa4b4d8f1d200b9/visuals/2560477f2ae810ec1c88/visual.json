@@ -2,83 +2,211 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.15.0/schema.json",
   "name": "2560477f2ae810ec1c88",
   "position": {
-    "x": 1206.5855094128087,
-    "y": 92.9908908301023,
+    "x": 1087.4740638827948,
+    "y": 63.969062581340872,
     "z": 7000,
-    "height": 283.564815247349,
-    "width": 443.14177605456155,
+    "height": 215.89558621202545,
+    "width": 736.78652437437256,
     "tabOrder": 7000
   },
   "visual": {
-    "visualType": "lineClusteredColumnComboChart",
+    "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Series": {
+        "Values": {
           "projections": [
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
+                      "Entity": "DimDate"
+                    }
+                  },
+                  "Property": "year"
+                }
+              },
+              "queryRef": "DimDate.year",
+              "nativeQueryRef": "year"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
                       "Entity": "DimGDP"
                     }
                   },
-                  "Property": "gdp_usd"
+                  "Property": "US GDP (USD)"
                 }
               },
-              "queryRef": "DimGDP.gdp_usd",
-              "nativeQueryRef": "gdp_usd"
-            }
-          ]
-        },
-        "Y2": {
-          "projections": [
+              "queryRef": "DimGDP.US GDP (USD)",
+              "nativeQueryRef": "US GDP",
+              "displayName": "US GDP"
+            },
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "FactTaxiDaily"
-                        }
-                      },
-                      "Property": "total_amount_usd"
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
                     }
                   },
-                  "Function": 0
+                  "Property": "Total Revenue USD"
                 }
               },
-              "queryRef": "Sum(FactTaxiDaily.total_amount_usd)",
-              "nativeQueryRef": "Sum of total_amount_usd"
+              "queryRef": "FactTaxiDaily.Total Revenue USD",
+              "nativeQueryRef": "Total Revenue USD"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
+                    }
+                  },
+                  "Property": "Total Revenue EUR"
+                }
+              },
+              "queryRef": "FactTaxiDaily.Total Revenue EUR",
+              "nativeQueryRef": "Total Revenue EUR"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactTaxiDaily"
+                    }
+                  },
+                  "Property": "Total Trips"
+                }
+              },
+              "queryRef": "FactTaxiDaily.Total Trips",
+              "nativeQueryRef": "Total Trips"
             }
           ]
         }
-      },
-      "sortDefinition": {
-        "sort": [
-          {
-            "field": {
-              "Aggregation": {
-                "Expression": {
-                  "Column": {
-                    "Expression": {
-                      "SourceRef": {
-                        "Entity": "FactTaxiDaily"
-                      }
-                    },
-                    "Property": "total_amount_usd"
-                  }
-                },
-                "Function": 0
-              }
-            },
-            "direction": "Descending"
-          }
-        ],
-        "isDefaultSort": true
       }
     },
+    "objects": {
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "total": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "15D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "cca386167ede82a65cf2",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "DimGDP"
+              }
+            },
+            "Property": "US GDP (USD)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "b619bd36f2e654133e75",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FactTaxiDaily"
+              }
+            },
+            "Property": "Total Trips"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "9b2880155a083f5f9d8f",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FactTaxiDaily"
+              }
+            },
+            "Property": "Total Revenue USD"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "dec7cfaf1a316574739b",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FactTaxiDaily"
+              }
+            },
+            "Property": "Total Revenue EUR"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "e5047fb2fb709790f202",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "DimDate"
+              }
+            },
+            "Property": "year"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

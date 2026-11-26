@@ -4,10 +4,10 @@
   "position": {
     "x": 0,
     "y": 678.31700676453261,
-    "z": 6000,
+    "z": 10000,
     "height": 402.39144469082441,
     "width": 948.49411962837178,
-    "tabOrder": 6000
+    "tabOrder": 5000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -124,56 +124,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "303ca1736c794d9fc235",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimZone"
-              }
-            },
-            "Property": "borough"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "b12bf9980e44672a9b89",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "DimZone"
-              }
-            },
-            "Property": "zone"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "16229dc669c51de5d7af",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "FactTaxiDaily"
-                  }
-                },
-                "Property": "trip_count"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

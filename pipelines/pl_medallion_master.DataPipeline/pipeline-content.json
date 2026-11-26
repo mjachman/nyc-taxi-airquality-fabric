@@ -37,14 +37,7 @@
           "secureOutput": false
         },
         "name": "df_gdp",
-        "dependsOn": [
-          {
-            "activity": "df_taxi_zones",
-            "dependencyConditions": [
-              "Succeeded"
-            ]
-          }
-        ]
+        "dependsOn": []
       },
       {
         "type": "RefreshDataflow",
@@ -63,14 +56,7 @@
           "secureOutput": false
         },
         "name": "df_fx",
-        "dependsOn": [
-          {
-            "activity": "df_gdp",
-            "dependencyConditions": [
-              "Succeeded"
-            ]
-          }
-        ]
+        "dependsOn": []
       },
       {
         "type": "RefreshDataflow",
@@ -112,14 +98,7 @@
           "secureOutput": false
         },
         "name": "df_openaq",
-        "dependsOn": [
-          {
-            "activity": "df_fx",
-            "dependencyConditions": [
-              "Succeeded"
-            ]
-          }
-        ]
+        "dependsOn": []
       },
       {
         "type": "TridentNotebook",
@@ -138,7 +117,7 @@
         "name": "nb_silver_transform_zones",
         "dependsOn": [
           {
-            "activity": "Check Taxi Ingest Flag",
+            "activity": "df_taxi_zones",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -160,11 +139,9 @@
           "secureOutput": false
         },
         "name": "nb_silver_transform_taxi",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
-            "activity": "nb_silver_transform_openaq_measurements",
+            "activity": "Check Taxi Ingest Flag",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -188,7 +165,7 @@
         "name": "nb_silver_transform_openaq_measurements",
         "dependsOn": [
           {
-            "activity": "nb_silver_transform_openaq_locations",
+            "activity": "df_openaq",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -212,7 +189,7 @@
         "name": "nb_silver_transform_openaq_locations",
         "dependsOn": [
           {
-            "activity": "nb_silver_transform_fx",
+            "activity": "df_openaq",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -236,7 +213,7 @@
         "name": "nb_silver_transform_gdp",
         "dependsOn": [
           {
-            "activity": "nb_silver_transform_zones",
+            "activity": "df_gdp",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -260,7 +237,7 @@
         "name": "nb_silver_transform_fx",
         "dependsOn": [
           {
-            "activity": "nb_silver_transform_gdp",
+            "activity": "df_fx",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -293,6 +270,36 @@
         },
         "name": "gold_dims",
         "dependsOn": [
+          {
+            "activity": "nb_silver_transform_zones",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          },
+          {
+            "activity": "nb_silver_transform_gdp",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          },
+          {
+            "activity": "nb_silver_transform_fx",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          },
+          {
+            "activity": "nb_silver_transform_openaq_locations",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          },
+          {
+            "activity": "nb_silver_transform_openaq_measurements",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          },
           {
             "activity": "nb_silver_transform_taxi",
             "dependencyConditions": [
@@ -370,16 +377,7 @@
           "ifFalseActivities": []
         },
         "name": "Check Taxi Ingest Flag",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
-        "dependsOn": [
-          {
-            "activity": "df_openaq",
-            "dependencyConditions": [
-              "Succeeded"
-            ]
-          }
-        ]
+        "dependsOn": []
       },
       {
         "type": "PBISemanticModelRefresh",

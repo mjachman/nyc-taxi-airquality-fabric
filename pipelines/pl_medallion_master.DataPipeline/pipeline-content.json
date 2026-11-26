@@ -139,6 +139,8 @@
           "secureOutput": false
         },
         "name": "nb_silver_transform_taxi",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "Check Taxi Ingest Flag",
@@ -377,6 +379,8 @@
           "ifFalseActivities": []
         },
         "name": "Check Taxi Ingest Flag",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
         "dependsOn": []
       },
       {

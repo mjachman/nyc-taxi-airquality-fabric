@@ -33,7 +33,7 @@ BEGIN
     SELECT DATEADD(DAY, value, @start_date) AS cal_date
     FROM GENERATE_SERIES(0, DATEDIFF(DAY, @start_date, @end_date));
 
-    TRUNCATE TABLE dbo.DimDate;
+    DELETE FROM dbo.DimDate;
     INSERT INTO dbo.DimDate (
         date_key, year, month_num, month, weekday_num, weekday, is_weekend
     )
@@ -55,7 +55,7 @@ BEGIN
 
     DROP TABLE IF EXISTS #dates;
 
-    TRUNCATE TABLE dbo.DimZone;
+    DELETE FROM dbo.DimZone;
     INSERT INTO dbo.DimZone (
         location_id, zone, borough, service_zone
     )
@@ -66,7 +66,7 @@ BEGIN
         ISNULL(CAST(service_zone AS VARCHAR(30)), 'N/A')
     FROM lakehouse_silver.dbo.silver_taxi_zones;
 
-    TRUNCATE TABLE dbo.DimGDP;
+    DELETE FROM dbo.DimGDP;
     INSERT INTO dbo.DimGDP (
         year, country_code, country_name, indicator_id, gdp_usd
     )
@@ -78,7 +78,7 @@ BEGIN
         CAST(value AS DECIMAL(18, 2))
     FROM lakehouse_silver.dbo.silver_world_bank_gdp;
 
-    TRUNCATE TABLE dbo.DimFX;
+    DELETE FROM dbo.DimFX;
     INSERT INTO dbo.DimFX (
         rate_date, currency, currency_denom, exchange_rate, is_carried_forward
     )
@@ -99,7 +99,7 @@ BEGIN
         ORDER BY fx.rate_date DESC
     ) AS latest;
 
-    TRUNCATE TABLE dbo.DimSensors;
+    DELETE FROM dbo.DimSensors;
     INSERT INTO dbo.DimSensors (
         sensor_id, location_id, station_name, parameter,
         units, is_monitor, latitude, longitude
@@ -115,7 +115,7 @@ BEGIN
         CAST(longitude AS DECIMAL(9, 6))
     FROM lakehouse_silver.dbo.silver_openaq_locations;
 
-    TRUNCATE TABLE dbo.DimHour;
+    DELETE FROM dbo.DimHour;
     INSERT INTO dbo.DimHour (hour_key, hour_label)
     SELECT
         ISNULL(CAST(value AS INT), 0),

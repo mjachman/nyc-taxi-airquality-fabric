@@ -2,6 +2,28 @@ table FactTaxiDaily
 	lineageTag: 7aca4090-ffc8-4d06-81bd-f44623e48385
 	sourceLineageTag: [dbo].[FactTaxiDaily]
 
+	measure 'Total Trips' = SUM(FactTaxiDaily[trip_count])
+		formatString: #,0
+		lineageTag: c7433441-c7a7-49fa-b618-3693eace300d
+
+	measure 'Total Passengers' = SUM(FactTaxiDaily[total_passengers])
+		formatString: #,0
+		lineageTag: 31490e1d-b17e-45d4-ba9f-e006b468df03
+
+	measure 'Total Trip Distance (mi)' = SUM(FactTaxiDaily[total_distance])
+		formatString: #,0.00
+		lineageTag: e014b309-f1f3-454f-b88d-d1a6ef6fe54f
+
+	measure 'Avg Trip Duration (min)' = DIVIDE(SUM(FactTaxiDaily[total_duration_min]), SUM(FactTaxiDaily[trip_count]))
+		formatString: #,0.00
+		lineageTag: 3db13808-620b-4b96-bc6e-4e5e1c58e342
+
+	measure 'Avg Fare per Trip USD' = DIVIDE(SUM(FactTaxiDaily[total_fare_usd]), SUM(FactTaxiDaily[trip_count]))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 201fa24e-b55f-4ba1-bf58-b6cec6207649
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
 	measure 'Avg Revenue per Trip USD' = DIVIDE(SUM(FactTaxiDaily[total_amount_usd]), SUM(FactTaxiDaily[trip_count]))
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 57362a8b-200a-4968-8acc-8b497e3caa48
@@ -84,12 +106,14 @@ table FactTaxiDaily
 
 	column total_passengers
 		dataType: int64
-		formatString: 0
+		formatString: #,0
 		sourceProviderType: int
 		lineageTag: 7267f3a0-4ab6-46ce-b26e-a6de0e705a47
 		sourceLineageTag: total_passengers
 		summarizeBy: sum
 		sourceColumn: total_passengers
+
+		changedProperty = FormatString
 
 		annotation SummarizationSetBy = Automatic
 
@@ -106,13 +130,24 @@ table FactTaxiDaily
 
 		annotation SummarizationSetBy = Automatic
 
+	column total_duration_min
+		dataType: decimal
+		formatString: #,0.00
+		sourceProviderType: decimal(14, 2)
+		lineageTag: 4476d9e9-1f86-4fde-a70e-5c22c4b80034
+		sourceLineageTag: total_duration_min
+		summarizeBy: sum
+		sourceColumn: total_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
 	column avg_duration_min
 		dataType: decimal
 		formatString: #,0.00
 		sourceProviderType: decimal(10, 2)
 		lineageTag: bec71fd4-aab9-46bb-8f07-f2a5e91e4f2a
 		sourceLineageTag: avg_duration_min
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: avg_duration_min
 
 		changedProperty = FormatString
@@ -162,16 +197,16 @@ table FactTaxiDaily
 
 	column total_fare_eur
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
 		sourceProviderType: decimal(14, 2)
 		lineageTag: f49112d9-f81f-4951-898b-b8331eb50e8a
 		sourceLineageTag: total_fare_eur
 		summarizeBy: sum
 		sourceColumn: total_fare_eur
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	column total_amount_eur
 		dataType: decimal

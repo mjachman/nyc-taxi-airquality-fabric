@@ -2,6 +2,10 @@ table FactTaxiHourly
 	lineageTag: cc4494b0-525a-4709-994b-498776d4f848
 	sourceLineageTag: [dbo].[FactTaxiHourly]
 
+	measure 'Hourly Trips' = SUM(FactTaxiHourly[trip_count])
+		formatString: #,0
+		lineageTag: 88f059dd-9e4c-4415-bd8c-25bcb2bb5f34
+
 	column date_key
 		dataType: dateTime
 		formatString: General Date
@@ -46,13 +50,24 @@ table FactTaxiHourly
 
 		annotation SummarizationSetBy = Automatic
 
+	column total_duration_min
+		dataType: decimal
+		formatString: #,0.00
+		sourceProviderType: decimal(14, 2)
+		lineageTag: 1088fc6d-33f0-4601-8d37-4b8009976948
+		sourceLineageTag: total_duration_min
+		summarizeBy: sum
+		sourceColumn: total_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
 	column avg_duration_min
 		dataType: decimal
 		formatString: #,0.00
 		sourceProviderType: decimal(10, 2)
 		lineageTag: 28b63b05-98c9-44a3-8fc2-d049269e79b9
 		sourceLineageTag: avg_duration_min
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: avg_duration_min
 
 		changedProperty = FormatString
@@ -74,16 +89,16 @@ table FactTaxiHourly
 
 	column total_amount_eur
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
 		sourceProviderType: decimal(14, 2)
 		lineageTag: 6ab52f88-eb68-4b49-8943-dbd183cdaa3b
 		sourceLineageTag: total_amount_eur
 		summarizeBy: sum
 		sourceColumn: total_amount_eur
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = FormatString
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation SummarizationSetBy = Automatic
 
 	partition FactTaxiHourly = entity
 		mode: directLake

@@ -59,7 +59,7 @@ table DimGDP
 		annotation SummarizationSetBy = Automatic
 
 	column gdp_usd
-		dataType: double
+		dataType: decimal
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		sourceProviderType: decimal(18, 2)
 		lineageTag: b712a6b9-9751-49a8-987c-7cb1da2db76b

@@ -76,7 +76,7 @@ table FactTaxiHourly
 
 	column total_amount_usd
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		sourceProviderType: decimal(14, 2)
 		lineageTag: 11e53d55-2bc6-4d0d-a8a5-2976f8bdb5b5
 		sourceLineageTag: total_amount_usd

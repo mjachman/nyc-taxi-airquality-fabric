@@ -47,7 +47,7 @@ table DimFX
 		sourceProviderType: decimal(10, 4)
 		lineageTag: d1d19626-0f2f-4e9e-875e-89587f953a9d
 		sourceLineageTag: exchange_rate
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: exchange_rate
 
 		changedProperty = FormatString

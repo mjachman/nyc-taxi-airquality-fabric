@@ -41,7 +41,10 @@ table FactAirQualityDaily
 			VAR WeekdayAQ = CALCULATE([Weighted Avg AQ], DimDate[is_weekend] = FALSE())
 			VAR WeekendAQ = CALCULATE([Weighted Avg AQ], DimDate[is_weekend] = TRUE())
 			RETURN
-			DIVIDE(WeekdayAQ - WeekendAQ, WeekendAQ)
+			IF(
+			    NOT ISBLANK(WeekdayAQ) && NOT ISBLANK(WeekendAQ),
+			    DIVIDE(WeekdayAQ - WeekendAQ, WeekendAQ)
+			)
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 1ab1ec08-ab96-4889-b141-8de70181e2c6
 
@@ -77,7 +80,7 @@ table FactAirQualityDaily
 		sourceProviderType: decimal(12, 4)
 		lineageTag: 9ea93743-3cf4-4831-bc69-9725afd0b74e
 		sourceLineageTag: avg_value
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: avg_value
 
 		changedProperty = FormatString
@@ -90,7 +93,7 @@ table FactAirQualityDaily
 		sourceProviderType: decimal(12, 4)
 		lineageTag: 8e8eeded-92c8-4931-9248-00092b5a006a
 		sourceLineageTag: min_value
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: min_value
 
 		changedProperty = FormatString
@@ -103,7 +106,7 @@ table FactAirQualityDaily
 		sourceProviderType: decimal(12, 4)
 		lineageTag: b198168b-b523-47b6-af06-d9c7744eccb3
 		sourceLineageTag: max_value
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: max_value
 
 		changedProperty = FormatString
@@ -116,7 +119,7 @@ table FactAirQualityDaily
 		sourceProviderType: decimal(12, 4)
 		lineageTag: 9d11eb26-7603-439e-8772-e9015b40843c
 		sourceLineageTag: median_value
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: median_value
 
 		changedProperty = FormatString
@@ -136,11 +139,11 @@ table FactAirQualityDaily
 
 	column percent_coverage
 		dataType: decimal
-		formatString: #,0.00%;-#,0.00%;#,0.00%
+		formatString: #,0.00"%"
 		sourceProviderType: decimal(5, 2)
 		lineageTag: c4c75639-67f6-4561-a062-eb229e7ce68d
 		sourceLineageTag: percent_coverage
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: percent_coverage
 
 		changedProperty = FormatString

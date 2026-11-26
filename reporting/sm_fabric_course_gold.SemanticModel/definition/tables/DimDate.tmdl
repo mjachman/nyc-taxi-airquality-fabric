@@ -29,7 +29,7 @@ table DimDate
 		sourceProviderType: int
 		lineageTag: 2883c977-4619-4cf8-85b0-f5d5fea04fa8
 		sourceLineageTag: year
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: year
 
 		annotation SummarizationSetBy = Automatic
@@ -40,7 +40,7 @@ table DimDate
 		sourceProviderType: int
 		lineageTag: db2fbf1e-2440-44e6-ba22-4350e3742db4
 		sourceLineageTag: month_num
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: month_num
 
 		annotation SummarizationSetBy = Automatic
@@ -64,7 +64,7 @@ table DimDate
 		sourceProviderType: int
 		lineageTag: 2be585ec-bf34-487d-bbac-e401141d27e5
 		sourceLineageTag: weekday_num
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: weekday_num
 
 		annotation SummarizationSetBy = Automatic

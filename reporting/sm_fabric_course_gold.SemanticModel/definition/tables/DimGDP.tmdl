@@ -4,9 +4,9 @@ table DimGDP
 
 	measure 'US GDP (USD)' =
 			
-			IF(
-			    DISTINCTCOUNT(DimDate[year]) = 1,
-			    CALCULATE(MAX(DimGDP[gdp_usd])/1000000000000, CROSSFILTER(FactTaxiDaily[year], DimGDP[year], BOTH))
+			CALCULATE(
+			    AVERAGE(DimGDP[gdp_usd]) / 1000000000000,
+			    TREATAS(VALUES(DimDate[year]), DimGDP[year])
 			)
 		formatString: $#,##0.0000 "T"
 		lineageTag: 8e988187-e0c7-4910-8115-ab34c36c5918
@@ -60,7 +60,7 @@ table DimGDP
 
 	column gdp_usd
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		sourceProviderType: decimal(18, 2)
 		lineageTag: b712a6b9-9751-49a8-987c-7cb1da2db76b
 		sourceLineageTag: gdp_usd

@@ -24,6 +24,16 @@ table FactTaxiDaily
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
+	measure 'Total Revenue USD' = SUM(FactTaxiDaily[total_amount_usd])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 9f4c2a1e-8b3d-4e7a-9c12-4a8e6b2d9011
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Revenue EUR' = SUM(FactTaxiDaily[total_amount_eur])
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		lineageTag: 3d7a8e21-4c9b-4f12-a834-7c5d9e1f2022
+
 	measure 'Avg Revenue per Trip USD' = DIVIDE(SUM(FactTaxiDaily[total_amount_usd]), SUM(FactTaxiDaily[trip_count]))
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 57362a8b-200a-4968-8acc-8b497e3caa48
@@ -156,7 +166,7 @@ table FactTaxiDaily
 
 	column total_fare_usd
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		sourceProviderType: decimal(14, 2)
 		lineageTag: eaa0686f-32bc-4e92-a9ce-e2d395c3daaf
 		sourceLineageTag: total_fare_usd
@@ -169,7 +179,7 @@ table FactTaxiDaily
 
 	column total_tip_usd
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		sourceProviderType: decimal(14, 2)
 		lineageTag: f6ce0883-8317-47f0-a227-9c39ffbd15e4
 		sourceLineageTag: total_tip_usd

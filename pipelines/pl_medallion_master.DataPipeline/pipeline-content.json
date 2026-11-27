@@ -127,8 +127,8 @@
       {
         "type": "TridentNotebook",
         "typeProperties": {
-          "notebookId": "37ebf4f9-1d5f-4f54-a127-11ae5378fd0b",
-          "workspaceId": "f74538c4-e1c0-4843-8fd1-9e35f938bafa",
+          "notebookId": "5378fd0b-11ae-a127-4f54-1d5f37ebf4f9",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
           "sessionTag": "silver"
         },
         "policy": {
@@ -139,8 +139,6 @@
           "secureOutput": false
         },
         "name": "nb_silver_transform_taxi",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "Check Taxi Ingest Flag",
@@ -361,9 +359,12 @@
                   "month_count": 36
                 },
                 "waitOnCompletion": true,
-                "workspaceId": "f74538c4-e1c0-4843-8fd1-9e35f938bafa",
-                "pipelineId": "12fec01a-d790-4080-898e-f3870e2995bd",
+                "workspaceId": "00000000-0000-0000-0000-000000000000",
+                "pipelineId": "0e2995bd-f387-898e-4080-d79012fec01a",
                 "operationType": "InvokeFabricPipeline"
+              },
+              "externalReferences": {
+                "connection": "98f08580-6812-44b3-b06b-c66e4c6c5f9d"
               },
               "policy": {
                 "timeout": "0.12:00:00",
@@ -379,8 +380,6 @@
           "ifFalseActivities": []
         },
         "name": "Check Taxi Ingest Flag",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": []
       },
       {

@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/schedules/1.0.0/schema.json",
   "schedules": [
     {
-      "enabled": false,
-      "enabledControlType": "UserDisabled",
+      "enabled": true,
+      "enabledControlType": "UserEnabled",
       "jobType": "Execute",
       "configuration": {
         "type": "Daily",
@@ -11,7 +11,7 @@
         "endDateTime": "2026-12-08T23:59:00",
         "localTimeZoneId": "Central European Standard Time",
         "times": [
-          "06:00"
+          "12:31"
         ]
       },
       "parameters": []
